@@ -1,3 +1,9 @@
+/* #3849a2, #b50132 */
+
+/* F89B1C, #FDB716, #FFC767, #ED8213 */
+
+/* Start main styles */
+
 *{
     box-sizing: border-box;
     padding: 0;
@@ -16,6 +22,10 @@ h1{
     margin-bottom: 1.5rem;
     color: #3849a2;
 }
+
+/* End main styles */
+
+/* Start popup navigation styles */
 
 .popup-nav {
     display: flex;
@@ -56,3 +66,104 @@ h1{
     display: block;
 }
 
+/* End popup navigation styles */
+
+/* Start popup open tab content styles */
+
+.group-container {
+    margin-bottom: 1.5rem;
+}
+
+.group-container h3 {
+    width: max-content;
+    padding: .5rem 1rem;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    background-color: #cccccc;
+    font-size: 1.2em;
+}
+
+.tabs-container {
+    border: #cccccc 2px solid;
+    border-radius: 5px;
+    border-top-left-radius: 0px;
+    overflow: hidden;
+    padding: .75rem;
+}
+
+
+.tab {
+    display: flex;
+    flex-direction: column; /* Arrange items vertically */
+    padding: 8px;
+    border-bottom: 1px solid #cccccc; /* Border for each tab */
+    margin-bottom: 8px;
+    background-color: #ffffff; /* White background for tabs */
+    cursor: pointer; /* Pointer cursor for clickable tabs */
+}
+
+.tab:hover {
+    background-color: #f2f2f2;
+    border-radius: 5px;
+}
+
+.tab:hover .tab-title{
+    text-decoration: underline;
+}
+
+.tab:last-of-type{
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.title-container{
+    display: flex;
+}
+
+.tab-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin: 0;
+}
+
+.tab-time {
+    font-size: 0.9em;
+    color: #888888;
+    margin: 5px 0;
+}
+
+.btns-container{
+    display: flex;
+    justify-content: flex-end;
+}
+
+.pin-button,
+.close-button,
+.mute-button,
+.sleep-button {
+    width: 20px;
+    height: 20px;
+    margin: 2px;
+    cursor: pointer;
+}
+
+.active-tab .tab-title::after{
+    content: ' (Active Tab)';
+    color: #ED8213;
+}
+
+.pin-button:hover,
+.close-button:hover,
+.mute-button:hover,
+.sleep-button:hover {
+    transform: scale(1.2);
+}
+
+.pin-button:active,
+.close-button:active,
+.mute-button:active,
+.sleep-button:active {
+    transform: scale(1);
+}
+
+/* End popup open tab content styles */
