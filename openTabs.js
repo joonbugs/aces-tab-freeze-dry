@@ -23,22 +23,24 @@ function displayTabs() {
             }
         });
 
-        // Render tabs
+        // Render pinned tabs
         renderTabs(pinnedTabs, 'Pinned Tabs', 'pinned-tabs-container', '#F89B1C');
 
         // Render grouped tabs
         const groupIds = Object.keys(groupedTabs);
         groupIds.forEach((groupId) => {
             chrome.tabGroups.get(parseInt(groupId), (group) => {
-                renderTabs(groupedTabs[groupId], `Group: ${group.title}`, 'grouped-tabs-container', group.color || null);
-                renderTabs(ungroupedTabs, 'Ungrouped Tabs', 'ungrouped-tabs-container');
+                renderTabs(groupedTabs[groupId], `Group: ${group.title}`, 'grouped-tabs-container', group.color || null, groupId);
             });
         });
+
+        // Render ungrouped tabs
+        renderTabs(ungroupedTabs, 'Ungrouped Tabs', 'ungrouped-tabs-container');
     });
 }
 
 // Function to render a group of tabs inside a group container
-function renderTabs(tabList, groupTitle, containerClass, groupColor = null) {
+function renderTabs(tabList, groupTitle, containerClass, groupColor = null, groupId = null) {
     const openTabsContentEl = document.getElementById('openTabsContent');
     const groupContainer = document.createElement('div');
     groupContainer.classList.add('group-container');
@@ -46,6 +48,11 @@ function renderTabs(tabList, groupTitle, containerClass, groupColor = null) {
     const titleEl = document.createElement('h3');
     titleEl.textContent = groupTitle;
     groupContainer.appendChild(titleEl);
+
+    // Add close button for groups (except pinned)
+    if (groupId !== null) {
+        groupContainer.classList.add('chrome-group'); // Add a class for styling
+    }
 
     const tabsContainer = document.createElement('div');
     tabsContainer.classList.add('tabs-container');
@@ -60,6 +67,28 @@ function renderTabs(tabList, groupTitle, containerClass, groupColor = null) {
         const tabEl = createTabElement(tab);
         tabsContainer.appendChild(tabEl);
     });
+
+    // Add ungroup button and close button for groups
+    if (groupId !== null) {
+        const buttonContainer = document.createElement('div');
+        buttonContainer.classList.add('button-container'); // Container for group buttons
+
+        const ungroupButton = createUngroupButton(groupId, groupContainer, tabList);
+        buttonContainer.appendChild(ungroupButton); // Place ungroup button in the container
+
+        const closeButton = createCloseGroupButton(groupId, groupContainer);
+        buttonContainer.appendChild(closeButton); // Place close button in the container
+
+        tabsContainer.appendChild(buttonContainer); // Add the button container to tabs container
+    }
+
+    // Add no tabs message
+    if (tabList.length === 0) {
+        const noTabsEl = document.createElement('p');
+        noTabsEl.textContent = 'No tabs available';
+        noTabsEl.classList.add('no-tabs');
+        tabsContainer.appendChild(noTabsEl);
+    }
 
     groupContainer.appendChild(tabsContainer);
     openTabsContentEl.appendChild(groupContainer);
@@ -82,7 +111,7 @@ function createTabElement(tab) {
 
     // Create the favicon element
     const faviconEl = document.createElement('img');
-    faviconEl.src = tab.favIconUrl; // Set the favicon URL
+    faviconEl.src = tab.favIconUrl || '/icons/global.png'; // Set the favicon URL
     faviconEl.alt = 'Tab Icon';
     faviconEl.classList.add('tab-favicon'); // Add a class for styling
     faviconEl.style.width = '16px'; // Set width
@@ -256,6 +285,70 @@ function createSleepButton(tab) {
     });
 
     return sleepButton;
+}
+
+// Function to create a close button for groups// Function to create a close button for groups
+function createCloseGroupButton(groupId, groupContainer) {
+    const closeButton = document.createElement('button');
+    closeButton.innerText = 'Close';
+    closeButton.alt = 'Close Group';
+    closeButton.title = 'Close Group';
+    closeButton.classList.add('close-group-button');
+
+    closeButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent tab click
+        
+        // Ensure the groupId is being passed and is valid
+        if (!groupId) {
+            console.error('Group ID is missing or invalid');
+            return;
+        }
+
+        chrome.tabs.query({ groupId: parseInt(groupId) }, (tabs) => {
+            if (chrome.runtime.lastError) {
+                console.error('Error querying group tabs: ', chrome.runtime.lastError);
+                return;
+            }
+
+            if (!tabs || tabs.length === 0) {
+                console.error('No tabs found for the group with ID: ', groupId);
+                return;
+            }
+
+            const tabIds = tabs.map(tab => tab.id);
+            chrome.tabs.remove(tabIds, () => {
+                if (chrome.runtime.lastError) {
+                    console.error('Error removing group tabs: ', chrome.runtime.lastError);
+                    return;
+                }
+                groupContainer.remove(); // Remove group from the popup after closing all its tabs
+            });
+        });
+    });
+
+    return closeButton;
+}
+
+// Function to create an ungroup button for groups
+function createUngroupButton(groupId, groupContainer, tabList) {
+    const ungroupButton = document.createElement('button');
+    ungroupButton.textContent = 'Ungroup';
+    ungroupButton.classList.add('ungroup-button');
+
+    ungroupButton.addEventListener('click', () => {
+        chrome.tabs.ungroup(tabList.map(tab => tab.id), () => {
+            // Move tabs to ungrouped section
+            const ungroupedContainer = document.querySelector('.ungrouped-tabs-container');
+            tabList.forEach(tab => {
+                const tabElement = document.getElementById(`tab-${tab.id}`);
+                ungroupedContainer.appendChild(tabElement);
+            });
+
+            groupContainer.remove(); // Remove group from the popup
+        });
+    });
+
+    return ungroupButton;
 }
 
 // Function to format date

@@ -94,12 +94,12 @@ h1{
 
 .tab {
     display: flex;
-    flex-direction: column; /* Arrange items vertically */
+    flex-direction: column;
     padding: 8px;
-    border-bottom: 1px solid #cccccc; /* Border for each tab */
+    border-bottom: 1px solid #cccccc;
     margin-bottom: 8px;
-    background-color: #ffffff; /* White background for tabs */
-    cursor: pointer; /* Pointer cursor for clickable tabs */
+    background-color: #ffffff;
+    cursor: pointer;
 }
 
 .tab:hover {
@@ -114,6 +114,11 @@ h1{
 .tab:last-of-type{
     border-bottom: none;
     margin-bottom: 0;
+} 
+
+.chrome-group .tab:last-of-type{
+    border-bottom: 2px solid #cccccc;
+    margin-bottom: 8px;
 }
 
 .title-container{
@@ -145,6 +150,7 @@ h1{
     height: 20px;
     margin: 2px;
     cursor: pointer;
+    transition: all ease .2s;
 }
 
 .active-tab .tab-title::after{
@@ -164,6 +170,37 @@ h1{
 .mute-button:active,
 .sleep-button:active {
     transform: scale(1);
+}
+
+.ungroup-button, .close-group-button{
+    cursor: pointer;
+    padding: .5rem 1rem;
+    border-radius: 5px;
+    color: #f44336;
+    font-weight: bold;
+    border: #f44336 2px solid;
+    background: none;
+    transition: all ease .2s;
+}
+
+.ungroup-button:hover, .close-group-button {
+    background-color: #f44336;
+    color: #fff;
+}
+
+.ungroup-button:hover, .close-group-button:hover {
+    transform: scale(1.1);
+}
+
+.ungroup-button:active, .close-group-button:active {
+    transform: scale(1);
+}
+
+.button-container {
+    display: flex;
+    margin-top: 1.5rem;
+    justify-content: flex-end;
+    gap: 1rem;
 }
 
 /* End popup open tab content styles */
