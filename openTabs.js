@@ -45,8 +45,78 @@ function renderTabs(tabList, groupTitle, containerClass, groupColor = null, grou
     const groupContainer = document.createElement('div');
     groupContainer.classList.add('group-container');
 
-    const titleEl = document.createElement('h3');
-    titleEl.textContent = groupTitle;
+    // Create group title element
+    const titleEl = document.createElement('div');
+    titleEl.classList.add('group-title');
+
+    // Create collapse/expand arrow button (before group title)
+    let isExpanded = true; //TODO: initially be expanded but if collapsed by user store its state in storage so that when popup is opened the popup again the state is not lost
+
+    const arrowBtn = document.createElement('img');
+    arrowBtn.src = '/icons/arrow.svg';  // Default icon for expand (down arrow)
+    arrowBtn.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';  // Down arrow (expanded)
+    arrowBtn.title = isExpanded ? 'Collapse Group' : 'Expand Group';
+    arrowBtn.alt = isExpanded ? 'Collapse Group' : 'Expand Group';
+    arrowBtn.classList.add('collapse-expand-arrow');
+
+    // Add click event to toggle expand/collapse
+    arrowBtn.addEventListener('click', () => {
+        isExpanded = !isExpanded;  // Toggle state
+        tabsContainer.style.display = isExpanded ? 'block' : 'none'; // Show/Hide tabs
+
+        // Update arrow
+        arrowBtn.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'; // Rotate arrow
+        arrowBtn.title = isExpanded ? 'Collapse Group' : 'Expand Group';
+        arrowBtn.alt = isExpanded ? 'Collapse Group' : 'Expand Group';
+    });
+
+    // Add the arrow button to the title element
+    titleEl.appendChild(arrowBtn);
+
+
+    // Add group title text
+    const titleText = document.createElement('h3');
+    titleText.textContent = groupTitle;
+    titleEl.appendChild(titleText);
+
+    // Add collapse/expand button if it's a grouped tab (not pinned or ungrouped)
+    if (groupId !== null) {
+        const collapseBtn = document.createElement('img');
+        collapseBtn.src = '/icons/collapse.svg';  // Set default icon to collapse
+        collapseBtn.alt = 'Collapse Group';
+        collapseBtn.title = 'Collapse Group';
+        collapseBtn.classList.add('collapse-expand-button');
+
+        // Fetch the current state of the group (collapsed or not)
+        chrome.tabGroups.get(parseInt(groupId), (group) => {
+            let isCollapsed = group.collapsed;
+
+            // Set the button based on the current group state
+            collapseBtn.src = isCollapsed ? '/icons/expand.svg' : '/icons/collapse.svg';
+            collapseBtn.alt = isCollapsed ? 'Expand Group' : 'Collapse Group';
+            collapseBtn.title = isCollapsed ? 'Expand Group' : 'Collapse Group';
+
+            // Toggle group collapse/expand when the button is clicked
+            collapseBtn.addEventListener('click', () => {
+                isCollapsed = !isCollapsed;  // Toggle the state
+
+                // Update the tab group collapse state
+                chrome.tabGroups.update(parseInt(groupId), { collapsed: isCollapsed }, (updatedGroup) => {
+                    collapseBtn.src = updatedGroup.collapsed ? '/icons/expand.svg' : '/icons/collapse.svg';
+                    collapseBtn.alt = updatedGroup.collapsed ? 'Expand Group' : 'Collapse Group';
+                    collapseBtn.title = updatedGroup.collapsed ? 'Expand Group' : 'Collapse Group';
+                });
+            });
+        });
+
+        titleEl.appendChild(collapseBtn);  // Add collapse/expand button to the title
+    }
+
+    // Style the title background with group color if available
+    if (groupColor) {
+        titleEl.style.backgroundColor = groupColor;
+    }
+
     groupContainer.appendChild(titleEl);
 
     // Add close button for groups (except pinned)

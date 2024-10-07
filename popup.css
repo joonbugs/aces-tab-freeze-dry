@@ -74,13 +74,16 @@ h1{
     margin-bottom: 1.5rem;
 }
 
-.group-container h3 {
+.group-container .group-title {
     width: max-content;
     padding: .5rem 1rem;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     background-color: #cccccc;
     font-size: 1.2em;
+    display: flex;
+    gap: .5rem;
+    align-items: center;
 }
 
 .tabs-container {
@@ -145,7 +148,9 @@ h1{
 .pin-button,
 .close-button,
 .mute-button,
-.sleep-button {
+.sleep-button,
+.collapse-expand-button,
+.collapse-expand-arrow {
     width: 20px;
     height: 20px;
     margin: 2px;
@@ -154,14 +159,14 @@ h1{
 }
 
 .active-tab .tab-title::after{
-    content: ' (Active Tab)';
+    content: ' (ActiveTab)';
     color: #ED8213;
 }
 
 .pin-button:hover,
 .close-button:hover,
 .mute-button:hover,
-.sleep-button:hover {
+.sleep-button:hover{
     transform: scale(1.2);
 }
 
@@ -170,6 +175,10 @@ h1{
 .mute-button:active,
 .sleep-button:active {
     transform: scale(1);
+}
+
+.collapse-expand-button:active {
+    transform: scale(.8);
 }
 
 .ungroup-button, .close-group-button{
