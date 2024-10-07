@@ -9,35 +9,35 @@ function displayTabs() {
         const ungroupedTabs = [];
         const groupedTabs = {};
 
-        // Organize tabs
-        tabs.forEach((tab) => {
-            if (tab.pinned) {
-                pinnedTabs.push(tab);
-            } else if (!tab.groupId || tab.groupId === chrome.tabGroups.TAB_GROUP_ID_NONE) {
-                ungroupedTabs.push(tab);
-            } else {
-                if (!groupedTabs[tab.groupId]) {
-                    groupedTabs[tab.groupId] = [];
+        chrome.storage.local.get('pinnedGroups', (data) => {
+            const pinnedGroups = data.pinnedGroups || {};
+
+            tabs.forEach((tab) => {
+                if (tab.pinned) {
+                    pinnedTabs.push(tab);
+                } else if (!tab.groupId || tab.groupId === chrome.tabGroups.TAB_GROUP_ID_NONE) {
+                    ungroupedTabs.push(tab);
+                } else {
+                    if (!groupedTabs[tab.groupId]) {
+                        groupedTabs[tab.groupId] = [];
+                    }
+                    groupedTabs[tab.groupId].push(tab);
                 }
-                groupedTabs[tab.groupId].push(tab);
-            }
-        });
-
-        // Render pinned tabs
-        renderTabs(pinnedTabs, 'Pinned Tabs', 'pinned-tabs-container', '#F89B1C');
-
-        // Render grouped tabs
-        const groupIds = Object.keys(groupedTabs);
-        groupIds.forEach((groupId) => {
-            chrome.tabGroups.get(parseInt(groupId), (group) => {
-                renderTabs(groupedTabs[groupId], `Group: ${group.title}`, 'grouped-tabs-container', group.color || null, groupId);
             });
-        });
 
-        // Render ungrouped tabs
-        renderTabs(ungroupedTabs, 'Ungrouped Tabs', 'ungrouped-tabs-container');
+            renderTabs(pinnedTabs, 'Pinned Tabs', 'pinned-tabs-container', '#F89B1C');
+
+            Object.keys(groupedTabs).forEach((groupId) => {
+                chrome.tabGroups.get(parseInt(groupId), (group) => {
+                    renderTabs(groupedTabs[groupId], `${group.title}`, 'grouped-tabs-container', group.color || null, groupId);
+                });
+            });
+
+            renderTabs(ungroupedTabs, 'Ungrouped Tabs', 'ungrouped-tabs-container');
+        });
     });
 }
+
 
 // Function to render a group of tabs inside a group container
 function renderTabs(tabList, groupTitle, containerClass, groupColor = null, groupId = null) {
@@ -148,6 +148,9 @@ function renderTabs(tabList, groupTitle, containerClass, groupColor = null, grou
 
         const closeButton = createCloseGroupButton(groupId, groupContainer);
         buttonContainer.appendChild(closeButton); // Place close button in the container
+
+        const pinGroupButton = createPinGroupButton(groupId, groupTitle, groupColor, tabList);
+        buttonContainer.appendChild(pinGroupButton);
 
         tabsContainer.appendChild(buttonContainer); // Add the button container to tabs container
     }
@@ -425,4 +428,46 @@ function createUngroupButton(groupId, groupContainer, tabList) {
 function formatDate(timestamp) {
     const date = new Date(timestamp);
     return date.toLocaleString(); // Customize date format as needed
+}
+
+// Function to create the pin/unpin button for groups
+function createPinGroupButton(groupId, groupTitle, groupColor, tabList) {
+    const pinGroupButton = document.createElement('button');
+    pinGroupButton.classList.add('pin-group-button');
+
+    chrome.storage.local.get(['pinnedGroups'], (result) => {
+        const pinnedGroups = result.pinnedGroups || {};
+        const isPinned = !!pinnedGroups[groupId];
+
+        pinGroupButton.textContent = isPinned ? 'Unpin Group' : 'Pin Group';
+    });
+
+    pinGroupButton.addEventListener('click', () => {
+        chrome.storage.local.get(['pinnedGroups'], (result) => {
+            const pinnedGroups = result.pinnedGroups || {};
+            const isPinned = !!pinnedGroups[groupId];
+
+            if (isPinned) {
+                // Unpin the group
+                delete pinnedGroups[groupId];
+                pinGroupButton.textContent = 'Pin Group';
+            } else {
+                // Pin the group
+                const groupTabs = tabList.map((tab) => ({ id: tab.id, url: tab.url }));
+                pinnedGroups[groupId] = { title: groupTitle, tabs: groupTabs, color: groupColor };
+                pinGroupButton.textContent = 'Unpin Group';
+            }
+
+            // Save the updated pinned groups to storage
+            chrome.storage.local.set({ pinnedGroups }, () => {
+                console.log('Group pinned/unpinned:', pinnedGroups);
+            });
+        });
+    });
+
+    // TODO: Add logic to check if the group is changed 
+    // where when we want to update stored group right now we need 
+    // to unpin and pin this group again 
+
+    return pinGroupButton;
 }

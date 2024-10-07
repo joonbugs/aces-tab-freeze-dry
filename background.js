@@ -1,3 +1,59 @@
+// Listen for when the extension is installed to open a new tab of the given URL
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  if (reason === 'install') {
+    chrome.tabs.create({
+      url: 'https://github.com/MaryEhb/tab-manager-chrome-extension'
+    });
+  }
+});
+
+// When startup check pinned groups to open them 
+// FIXME: Breaks when auto grouping groups are enabled
+chrome.runtime.onStartup.addListener(() => {
+  chrome.storage.local.get(['pinnedGroups'], (result) => {
+    const pinnedGroups = result.pinnedGroups || {};
+
+    Object.keys(pinnedGroups).forEach((oldGroupId) => {
+      const groupInfo = pinnedGroups[oldGroupId];
+      const { title, tabs, color } = groupInfo;
+
+      // Create an array to store the newly created tab IDs
+      const createdTabIds = [];
+
+      // Iterate through the stored tabs and create them
+      tabs.forEach((tabInfo, index) => {
+        chrome.tabs.create({ url: tabInfo.url, active: index === 0 }, (createdTab) => {
+          // Push the created tab ID to the array
+          createdTabIds.push(createdTab.id);
+
+          // After all tabs have been created, group them
+          if (createdTabIds.length === tabs.length) {
+            chrome.tabs.group({ tabIds: createdTabIds }, (newGroupId) => {
+              // Set the group title and color
+              chrome.tabGroups.update(newGroupId, { title, color });
+
+              // Update storage: remove the old group and add the new one
+              chrome.storage.local.get(['pinnedGroups'], (result) => {
+                const updatedPinnedGroups = result.pinnedGroups || {};
+
+                // Remove the old group
+                delete updatedPinnedGroups[oldGroupId];
+
+                // Add the new group
+                updatedPinnedGroups[newGroupId] = { title, tabs, color };
+
+                // Save the updated groups back to storage
+                chrome.storage.local.set({ pinnedGroups: updatedPinnedGroups });
+              });
+            });
+          }
+        });
+      });
+    });
+  });
+});
+
+
 // Global variables to store active groups and tab group mapping
 let activeGroups = {};
 let tabGroupMap = {};
