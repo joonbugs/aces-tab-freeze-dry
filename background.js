@@ -20,33 +20,40 @@ chrome.runtime.onStartup.addListener(() => {
       // Create an array to store the newly created tab IDs
       const createdTabIds = [];
 
+      // Track the position to insert the tabs at the start
+      let positionIndex = 0;
+
       // Iterate through the stored tabs and create them
-      tabs.forEach((tabInfo, index) => {
-        chrome.tabs.create({ url: tabInfo.url, active: index === 0 }, (createdTab) => {
-          // Push the created tab ID to the array
-          createdTabIds.push(createdTab.id);
+      tabs.forEach((tabInfo) => {
+        // Open the tab but do not navigate to it (active: false)
+        chrome.tabs.create({ url: tabInfo.url, active: false }, (createdTab) => {
+          // Move the tab to the first position in the window
+          chrome.tabs.move(createdTab.id, { index: positionIndex }, (movedTab) => {
+            createdTabIds.push(movedTab.id);
+            positionIndex++; // Increment the position for the next tab
 
-          // After all tabs have been created, group them
-          if (createdTabIds.length === tabs.length) {
-            chrome.tabs.group({ tabIds: createdTabIds }, (newGroupId) => {
-              // Set the group title and color
-              chrome.tabGroups.update(newGroupId, { title, color });
+            // After all tabs have been created and moved, group them
+            if (createdTabIds.length === tabs.length) {
+              chrome.tabs.group({ tabIds: createdTabIds }, (newGroupId) => {
+                // Set the group title and color
+                chrome.tabGroups.update(newGroupId, { title, color });
 
-              // Update storage: remove the old group and add the new one
-              chrome.storage.local.get(['pinnedGroups'], (result) => {
-                const updatedPinnedGroups = result.pinnedGroups || {};
+                // Update storage: remove the old group and add the new one
+                chrome.storage.local.get(['pinnedGroups'], (result) => {
+                  const updatedPinnedGroups = result.pinnedGroups || {};
 
-                // Remove the old group
-                delete updatedPinnedGroups[oldGroupId];
+                  // Remove the old group
+                  delete updatedPinnedGroups[oldGroupId];
 
-                // Add the new group
-                updatedPinnedGroups[newGroupId] = { title, tabs, color };
+                  // Add the new group
+                  updatedPinnedGroups[newGroupId] = { title, tabs, color };
 
-                // Save the updated groups back to storage
-                chrome.storage.local.set({ pinnedGroups: updatedPinnedGroups });
+                  // Save the updated groups back to storage
+                  chrome.storage.local.set({ pinnedGroups: updatedPinnedGroups });
+                });
               });
-            });
-          }
+            }
+          });
         });
       });
     });
