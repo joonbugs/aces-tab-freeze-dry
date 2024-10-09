@@ -8,6 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
         popupContents.forEach(content => content.classList.remove('popup-content--active'));
     };
 
+    // Check for dark mode preference
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode'); // Add dark mode class to the body
+    }
+
     // Add click event listeners to each tab
     popupNavTabs.forEach(tab => {
         tab.addEventListener('click', () => {

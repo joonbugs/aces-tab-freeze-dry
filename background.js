@@ -1,6 +1,7 @@
 // Add a variable to manage the auto-close state and time
 let autoCloseEnabled = false;
-let autoCloseTime = { minutes: 5, seconds: 0 }; // Default time
+let autoCloseTime = { minutes: 120, seconds: 0 }; // Default time
+let lazyLoadingEnabled = false; // Variable to manage lazy loading state
 
 // Listen for when the extension is installed and open a welcome tab 
 chrome.runtime.onInstalled.addListener(({ reason }) => {
@@ -14,7 +15,8 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
 // On startup, migrate pinned groups from storage to open them
 chrome.runtime.onStartup.addListener(async () => {
   try {
-    await migratePinnedGroups();
+    await loadLazyLoadingSettings(); // Load lazy loading settings first
+    await migratePinnedGroups(); // Migrate pinned groups
     await loadAutoCloseSettings(); // Load auto-close settings on startup
     createAutoCloseFunctionality(); // Start the auto-close functionality
   } catch (error) {
@@ -199,7 +201,7 @@ chrome.tabGroups.onUpdated.addListener((group, changeInfo) => {
 const loadAutoCloseSettings = async () => {
   const result = await chrome.storage.local.get(['autoCloseEnabled', 'autoCloseTime']);
   autoCloseEnabled = result.autoCloseEnabled || false;
-  autoCloseTime = result.autoCloseTime || { minutes: 5, seconds: 0 };
+  autoCloseTime = result.autoCloseTime || { minutes: 120, seconds: 0 };
 };
 
 // Create a function to check if a group is pinned
@@ -248,6 +250,9 @@ chrome.storage.onChanged.addListener((changes) => {
       autoCloseEnabled = changes.autoCloseEnabled.newValue;
       if (autoCloseEnabled) {
           createAutoCloseFunctionality();
+      } else {
+        chrome.storage.local.set({ autoCloseTime: { minutes: 120, seconds: 0 } });
+        autoCloseTime = { minutes: 120, seconds: 0 };          
       }
   }
   if (changes.autoCloseTime) {
@@ -256,3 +261,12 @@ chrome.storage.onChanged.addListener((changes) => {
 });
 
 /* End Auto Close Functionality */
+
+/* Start Lazy Loading Functionality */
+
+const loadLazyLoadingSettings = async () => {
+  const result = await chrome.storage.local.get(['lazyLoadingEnabled']);
+  lazyLoadingEnabled = result.lazyLoadingEnabled || false;
+};
+
+/* End Lazy Loading Functionality */

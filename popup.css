@@ -294,3 +294,59 @@ font-weight: bold;
   }
   
 /* End popup auto grouping content styles */
+
+/* Start options section styles */
+
+.option-container {
+    margin-bottom: 1.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 1rem;
+    background-color: #f9f9f9; /* Light background for options */
+    transition: background-color 0.3s ease;
+}
+
+.option-container:last-of-type {
+    margin-bottom: 0;
+}
+
+.option-container:hover {
+    background-color: #f0f0f0; /* Slightly darker on hover */
+}
+
+.option-description {
+    font-size: 0.9rem;
+    color: #666; /* Slightly muted text color */
+    margin-top: 0.5rem;
+}
+
+input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.time-settings {
+    margin-top: 0.5rem;
+}
+
+input[type="number"] {
+    width: 50px;
+    padding: 0.25rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+#optionsContent .editTimeBtn, .submitTimeBtn {
+    
+}
+
+/* End options section styles */
+
+
+/* Dark mode styles */
+
+
+
+
+
+
