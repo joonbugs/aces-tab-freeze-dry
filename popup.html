@@ -42,8 +42,25 @@
         </div>
 
         <div id="optionsContent" class="popup-content">
-            <p>Options will be here.</p>
-        </div>
+            <h2>Options</h2>
+            <div id="autoCloseOption" class="option-container">
+                <label>
+                    <input type="checkbox" id="autoCloseCheckbox">
+                    Auto Close Tabs
+                </label>
+                <div class="option-description">
+                    <p>Automatically close tabs after a specified time if they haven't been visited.</p>
+                </div>
+                <div class="time-settings" style="display: none;">
+                    <label for="autoCloseMinutes">Minutes:</label>
+                    <input type="number" id="autoCloseMinutes" min="0" value="5">
+                    <label for="autoCloseSeconds">Seconds:</label>
+                    <input type="number" id="autoCloseSeconds" min="0" value="0">
+                    <button id="editTimeBtn">Edit Time</button>
+                    <button id="submitTimeBtn" style="display: none;">Submit</button>
+                </div>
+            </div>
+        </div>        
 
     </div>
 

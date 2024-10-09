@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 displayTabs(); // This will be defined in openTabs.js
             } else if (tab.id === 'autoGroupBtn') {
                 // Call auto grouping function if needed
-                initAutoGrouping(); // This will be defined in autoGroup.js
+                autoGroup(); // This will be defined in autoGroup.js
             } else if (tab.id === 'sessionsBtn') {
                 // Call session management function if needed
                 loadSessions(); // This will be defined in sessions.js

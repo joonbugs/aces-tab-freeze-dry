@@ -1,3 +1,7 @@
+// Add a variable to manage the auto-close state and time
+let autoCloseEnabled = false;
+let autoCloseTime = { minutes: 5, seconds: 0 }; // Default time
+
 // Listen for when the extension is installed and open a welcome tab 
 chrome.runtime.onInstalled.addListener(({ reason }) => {
   if (reason === 'install') {
@@ -11,7 +15,8 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
 chrome.runtime.onStartup.addListener(async () => {
   try {
     await migratePinnedGroups();
-    // Any additional logic can go here after migration
+    await loadAutoCloseSettings(); // Load auto-close settings on startup
+    createAutoCloseFunctionality(); // Start the auto-close functionality
   } catch (error) {
     console.error('Error during startup migration:', error);
   }
@@ -187,3 +192,67 @@ chrome.tabGroups.onUpdated.addListener((group, changeInfo) => {
     }
   });
 });
+
+/* Start Auto Close Functionality */
+
+// Load auto-close settings from storage
+const loadAutoCloseSettings = async () => {
+  const result = await chrome.storage.local.get(['autoCloseEnabled', 'autoCloseTime']);
+  autoCloseEnabled = result.autoCloseEnabled || false;
+  autoCloseTime = result.autoCloseTime || { minutes: 5, seconds: 0 };
+};
+
+// Create a function to check if a group is pinned
+const isPinnedGroup = async (groupId) => {
+  const result = await chrome.storage.local.get(['pinnedGroups']);
+  const pinnedGroups = result.pinnedGroups || {};
+  
+  // Return true if the groupId exists in pinnedGroups, false otherwise
+  return Boolean(pinnedGroups[groupId]);
+};
+
+// Create the auto-close functionality
+const tabAccessTimes = {};
+const createAutoCloseFunctionality = () => {
+  setInterval(async () => {
+    if (!autoCloseEnabled) return;
+
+    const closeAfterMillis = (autoCloseTime.minutes * 60 + autoCloseTime.seconds) * 1000;
+
+    const tabs = await new Promise((resolve) => chrome.tabs.query({}, resolve));
+    const now = Date.now();
+
+    for (const tab of tabs) {
+      console.log(`Checking tab: ${tab.title}`);
+      // Update lastAccessed if the tab is active
+      if (tab.active) {
+        tabAccessTimes[tab.id] = now; // Update last accessed time
+      }
+
+      // Check if the tab is not pinned and not in a pinned group
+      if (!tab.active && !tab.pinned) {
+        const inPinnedGroup = tab.groupId != -1 && !(await isPinnedGroup(tab.groupId));
+        const lastAccessed = tabAccessTimes[tab.id] || tab.lastAccessed; 
+        if (!inPinnedGroup && (now - lastAccessed) > closeAfterMillis) {
+          chrome.tabs.remove(tab.id, () => {
+            console.log(`Closed tab: ${tab.title}`);
+          });
+        }
+      }
+    }
+  }, 1000); // Check every 1 seconds
+};
+
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.autoCloseEnabled) {
+      autoCloseEnabled = changes.autoCloseEnabled.newValue;
+      if (autoCloseEnabled) {
+          createAutoCloseFunctionality();
+      }
+  }
+  if (changes.autoCloseTime) {
+      autoCloseTime = changes.autoCloseTime.newValue;
+  }
+});
+
+/* End Auto Close Functionality */
