@@ -231,7 +231,7 @@ const createAutoCloseFunctionality = () => {
 
       // Check if the tab is not pinned and not in a pinned group
       if (!tab.active && !tab.pinned) {
-        const inPinnedGroup = tab.groupId != -1 && !(await isPinnedGroup(tab.groupId));
+        const inPinnedGroup = tab.groupId != -1 && (await isPinnedGroup(tab.groupId));
         const lastAccessed = tabAccessTimes[tab.id] || tab.lastAccessed; 
         if (!inPinnedGroup && (now - lastAccessed) > closeAfterMillis) {
           chrome.tabs.remove(tab.id, () => {

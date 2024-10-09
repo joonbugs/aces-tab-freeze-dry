@@ -465,9 +465,5 @@ function createPinGroupButton(groupId, groupTitle, groupColor, tabList) {
         });
     });
 
-    // TODO: Add logic to check if the group is changed 
-    // where when we want to update stored group right now we need 
-    // to unpin and pin this group again 
-
     return pinGroupButton;
 }
