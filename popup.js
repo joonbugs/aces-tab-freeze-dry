@@ -8,6 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
         popupContents.forEach(content => content.classList.remove('popup-content--active'));
     };
 
+    // Check for dark mode preference
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode'); // Add dark mode class to the body
+    }
+
     // Add click event listeners to each tab
     popupNavTabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -21,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 displayTabs(); // This will be defined in openTabs.js
             } else if (tab.id === 'autoGroupBtn') {
                 // Call auto grouping function if needed
-                initAutoGrouping(); // This will be defined in autoGroup.js
+                autoGroup(); // This will be defined in autoGroup.js
             } else if (tab.id === 'sessionsBtn') {
                 // Call session management function if needed
                 loadSessions(); // This will be defined in sessions.js

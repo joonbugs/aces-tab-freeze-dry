@@ -16,7 +16,7 @@
 
 <body>
     <!-- Heading -->
-    <h1><img src="./icons/icon32.png"/> Tab Manager</h1>
+    <h1><img src="./icons/icon32.png" /> Tab Manager</h1>
 
     <!-- Popup Navigation -->
     <div class="popup-nav">
@@ -42,7 +42,50 @@
         </div>
 
         <div id="optionsContent" class="popup-content">
-            <p>Options will be here.</p>
+            <div id="autoCloseOption" class="option-container">
+                <label class="checkwrap">
+                    <input type="checkbox" id="autoCloseCheckbox">
+                    Auto Close Tabs
+                </label>
+                <div class="option-description">
+                    <p>Automatically close tabs after a specified time if they haven't been visited.</p>
+                </div>
+                <div class="time-settings" style="display: none;">
+                    <label for="autoCloseMinutes">Minutes:</label>
+                    <input type="number" id="autoCloseMinutes" min="0" value="120">
+                    <label for="autoCloseSeconds">Seconds:</label>
+                    <input type="number" id="autoCloseSeconds" min="0" value="0">
+                    <button id="editTimeBtn">Edit Time</button>
+                    <button id="submitTimeBtn" style="display: none;">Submit</button>
+                </div>
+            </div>
+            <div id="autoSleepOption" class="option-container">
+                <label class="checkwrap">
+                    <input type="checkbox" id="autoSleepCheckbox">
+                    Auto Sleep Tabs
+                </label>
+                <div class="option-description">
+                    <p>Automatically sleep inactive tabs after a specified time.</p>
+                </div>
+                <div class="time-settings" style="display: none;">
+                    <label for="autoSleepMinutes">Minutes:</label>
+                    <input type="number" id="autoSleepMinutes" min="0" value="120">
+                    <label for="autoSleepSeconds">Seconds:</label>
+                    <input type="number" id="autoSleepSeconds" min="0" value="0">
+                    <button id="editSleepTimeBtn">Edit Time</button>
+                    <button id="submitSleepTimeBtn" style="display: none;">Submit</button>
+                </div>
+            </div>
+
+            <div id="lazyLoadingOption" class="option-container">
+                <label class="checkwrap">
+                    <input type="checkbox" id="lazyLoadingCheckbox">
+                    Lazy Load Tabs
+                </label>
+                <div class="option-description">
+                    <p>Load tabs only when accessed, reducing initial load time.</p>
+                </div>
+            </div>
         </div>
 
     </div>

@@ -294,3 +294,71 @@ font-weight: bold;
   }
   
 /* End popup auto grouping content styles */
+
+/* Start options section styles */
+
+.option-container {
+    margin-bottom: 1.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 1rem;
+    background-color: #f9f9f9; /* Light background for options */
+    transition: background-color 0.3s ease;
+}
+
+.option-container:last-of-type {
+    margin-bottom: 0;
+}
+
+.option-container:hover {
+    background-color: #f0f0f0; /* Slightly darker on hover */
+}
+
+.option-description {
+    font-size: 0.9rem;
+    color: #666; /* Slightly muted text color */
+    margin-top: 0.5rem;
+}
+
+input[type="checkbox"] {
+    margin-right: 0.2rem;
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+}
+
+#optionsContent .checkwrap {
+    font-weight: bold;
+    cursor: pointer;
+    font-size: .9rem;
+}
+
+.time-settings {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+input[type="number"] {
+    width: 50px;
+    padding: 0.25rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+#optionsContent .editTimeBtn, #optionsContent .submitTimeBtn {
+    
+}
+
+/* End options section styles */
+
+
+/* Dark mode styles */
+
+
+
+
+
+
