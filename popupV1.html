@@ -21,68 +21,24 @@
     <!-- Popup Navigation -->
     <div class="popup-nav">
         <div class="nav-tab nav-tab--active" id="openTabsBtn">Open Tabs</div>
-        <div class="nav-tab" id="autoGroupBtn">Auto Group</div>
+        <div class="nav-tab" id="autoGroupBtn">auto Group</div>
         <div class="nav-tab" id="sessionsBtn">Sessions</div>
         <div class="nav-tab" id="optionsBtn">Options</div>
     </div>
 
     <!-- Popup Content -->
     <div class="popup-content-container">
+
         <div id="openTabsContent" class="popup-content popup-content--active">
             <p>Open Tabs will be here.</p>
         </div>
 
-        <!-- Auto Grouping Section -->
         <div id="autoGroupContent" class="popup-content">
-
-            <!-- Auto Grouping Checkbox -->
-            <div class="checkboxWrapper">
-                <input type="checkbox" id="activateAutoGroupingCheckbox">
-                <label for="activateAutoGroupingCheckbox">Enable Auto Grouping</label>
-            </div>
-
-            <!-- Form Container (disabled by default until auto-grouping is enabled) -->
-            <div id="formContainer" class="disabled">
-
-                <!-- Group Name Input -->
-                <label for="groupName">Group Name:</label>
-                <input type="text" id="groupName">
-
-                <!-- Group Color Picker -->
-                <label for="colorPicker">Group Color:</label>
-                <div id="colorPicker" style="display: flex;">
-                    <!-- Dynamically generated color circles based on allowed colors -->
-                    <div class="color-circle" data-color="grey" style="background-color: grey;"></div>
-                    <div class="color-circle" data-color="blue" style="background-color: blue;"></div>
-                    <div class="color-circle" data-color="red" style="background-color: red;"></div>
-                    <div class="color-circle" data-color="yellow" style="background-color: yellow;"></div>
-                    <div class="color-circle" data-color="green" style="background-color: green;"></div>
-                    <div class="color-circle" data-color="pink" style="background-color: pink;"></div>
-                    <div class="color-circle" data-color="purple" style="background-color: purple;"></div>
-                    <div class="color-circle" data-color="cyan" style="background-color: cyan;"></div>
-                    <div class="color-circle" data-color="orange" style="background-color: orange;"></div>
-                </div>
-                <!-- Pattern Input and List -->
-                <label for="groupPattern">Pattern:</label>
-                <input type="text" id="groupPattern">
-                <ul id="patternList"></ul>
-
-                <!-- Button Wrapper -->
-                <div class="buttonWrapper">
-                    <button id="addPatternBtn">Add Pattern</button>
-                    <button id="saveGroupBtn">Save Group</button>
-                    <button id="clearFormBtn">Clear</button>
-                </div>
-
-                <!-- Saved Groups Section -->
-                <h3>Saved Groups</h3>
-                <ul id="savedGroupsList"></ul>
-            </div>
-
+            <p>Auto Grouping will be here.</p>
         </div>
 
         <div id="sessionsContent" class="popup-content">
-            <p>Session Management will be here.</p>
+            <p>Session Managment will be here.</p>
         </div>
 
         <div id="optionsContent" class="popup-content">
