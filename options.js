@@ -59,7 +59,7 @@ function handleCheckboxChange(event) {
 
 function toggleTimeSettings(isEnabled) {
     const timeSettings = document.querySelector('.time-settings');
-    timeSettings.style.display = isEnabled ? 'inline-block' : 'none';
+    timeSettings.style.display = isEnabled ? 'flex' : 'none';
 }
 
 function toggleEdit() {
@@ -107,7 +107,7 @@ function handleSleepCheckboxChange(event) {
 
 function toggleSleepTimeSettings(isEnabled) {
     const sleepTimeSettings = document.querySelector('#autoSleepOption .time-settings');
-    sleepTimeSettings.style.display = isEnabled ? 'inline-block' : 'none';
+    sleepTimeSettings.style.display = isEnabled ? 'flex' : 'none';
 }
 
 function toggleSleepEdit() {

@@ -321,11 +321,23 @@ font-weight: bold;
 }
 
 input[type="checkbox"] {
-    margin-right: 0.5rem;
+    margin-right: 0.2rem;
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+}
+
+#optionsContent .checkwrap {
+    font-weight: bold;
+    cursor: pointer;
+    font-size: .9rem;
 }
 
 .time-settings {
     margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 input[type="number"] {
@@ -336,7 +348,7 @@ input[type="number"] {
     font-size: 0.9rem;
 }
 
-#optionsContent .editTimeBtn, .submitTimeBtn {
+#optionsContent .editTimeBtn, #optionsContent .submitTimeBtn {
     
 }
 
