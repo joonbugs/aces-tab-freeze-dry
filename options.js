@@ -7,7 +7,7 @@ function loadOptions() {
             autoCloseEnabled = false, 
             autoCloseTime = { minutes: 120, seconds: 0 }, 
             autoSleepEnabled = false, 
-            autoSleepTime = { minutes: 120, seconds: 0 }, 
+            autoSleepTime = { minutes: 60, seconds: 0 }, 
             lazyLoadingEnabled = false 
         } = result;
 

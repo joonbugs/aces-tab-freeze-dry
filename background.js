@@ -1,9 +1,12 @@
-// Add a variable to manage the auto-close state and time
-let autoCloseEnabled = false;
+// Global variables
+let autoCloseEnabled = false; // Variable to manage auto close state
 let autoCloseTime = { minutes: 120, seconds: 0 }; // Default time
 let lazyLoadingEnabled = false; // Variable to manage lazy loading state
-let activeGroups = {};
-let tabGroupMap = {};
+let autoSleepEnabled = false; // Variable to manage auto sleep state
+let autoSleepTime = { minutes: 60, seconds: 0 }; // Default time
+let autoGroupingEnabled = false;
+let autoGroups = [];
+let GroupingFunctioning = false;
 
 // Listen for when the extension is installed and open a welcome tab 
 chrome.runtime.onInstalled.addListener(({ reason }) => {
@@ -17,15 +20,70 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
 // On startup, migrate pinned groups from storage to open them
 chrome.runtime.onStartup.addListener(async () => {
   try {
-    await loadLazyLoadingSettings(); // Load lazy loading settings first
+    await getVaribales();
+    // await loadLazyLoadingSettings(); // Load lazy loading settings first
     await migratePinnedGroups(); // Migrate pinned groups
-    await loadAutoCloseSettings(); // Load auto-close settings on startup
-    createAutoCloseFunctionality(); // Start the auto-close functionality
-    await initializeTabGroups();
+    tabLooping();
   } catch (error) {
     console.error('Error during startup migration:', error);
   }
 });
+
+/* Start Get Global variables state from storage */
+
+const getVaribales = async () => {
+  try {
+    const result = await chrome.storage.local.get(['autoCloseEnabled', 'autoCloseTime', 'lazyLoadingEnabled', 'autoSleepEnabled', 'autoSleepTime', 'autoGroupingEnabled', 'tabGroups']);
+    autoCloseEnabled = result.autoCloseEnabled || false;
+    autoCloseTime = result.autoCloseTime || { minutes: 120, seconds: 0 };
+    lazyLoadingEnabled = result.lazyLoadingEnabled || false;
+    autoSleepEnabled = result.autoSleepEnabled || false;
+    autoSleepTime = result.autoSleepTime || { minutes: 60, seconds: 0 };
+    autoGroupingEnabled = result.autoGroupingEnabled || false;
+    autoGroups = result.tabGroups || [];
+    console.log('Variables Loaded', autoCloseEnabled, autoCloseTime, lazyLoadingEnabled, autoSleepEnabled, autoSleepTime, autoGroupingEnabled, autoGroups);
+  } catch (error) {
+    console.error('Error getting variables from storage:', error);
+  }
+}
+
+/* End Get Global variables state from storage */
+
+/* Start of listensers when global variables change in storage */
+
+chrome.storage.onChanged.addListener(async (changes) => {
+  console.log(changes)
+  if (changes.autoCloseEnabled) {
+    autoCloseEnabled = changes.autoCloseEnabled.newValue;
+  }
+  if (changes.autoCloseTime) {
+    autoCloseTime = changes.autoCloseTime.newValue;
+  }
+  if (changes.lazyLoadingEnabled) {
+    lazyLoadingEnabled = changes.lazyLoadingEnabled.newValue;
+  }
+  if (changes.autoSleepEnabled) {
+    autoSleepEnabled = changes.autoSleepEnabled.newValue;
+  }
+  if (changes.autoSleepTime) {
+    autoSleepTime = changes.autoSleepTime.newValue;
+  }
+  if (changes.autoGroupingEnabled) {
+    autoGroupingEnabled = changes.autoGroupingEnabled.newValue;
+    if (!autoGroupingEnabled) {
+      await ungroupAutoGroups();
+    }
+  }
+  if (changes.tabGroups) {
+    autoGroups = changes.tabGroups.newValue;
+  }
+
+  console.log('Variables Changed', autoCloseEnabled, autoCloseTime, lazyLoadingEnabled, autoSleepEnabled, autoSleepTime, autoGroupingEnabled, autoGroups);
+});
+
+/* End of listensers when global variables change in storage */
+
+/* Start Pinning Functionality */
 
 /**
  * Migrate pinned groups from storage to active tab groups
@@ -198,16 +256,7 @@ chrome.tabGroups.onUpdated.addListener((group, changeInfo) => {
   });
 });
 
-/* Start Auto Close Functionality */
-
-// Load auto-close settings from storage
-const loadAutoCloseSettings = async () => {
-  const result = await chrome.storage.local.get(['autoCloseEnabled', 'autoCloseTime']);
-  autoCloseEnabled = result.autoCloseEnabled || false;
-  autoCloseTime = result.autoCloseTime || { minutes: 120, seconds: 0 };
-};
-
-// Create a function to check if a group is pinned
+// unction to check if a group is pinned
 const isPinnedGroup = async (groupId) => {
   const result = await chrome.storage.local.get(['pinnedGroups']);
   const pinnedGroups = result.pinnedGroups || {};
@@ -216,298 +265,176 @@ const isPinnedGroup = async (groupId) => {
   return Boolean(pinnedGroups[groupId]);
 };
 
-// Create the auto-close functionality
+/* End Pinning Functionality */
+
+/* Start Tab Looping */
 const tabAccessTimes = {};
-const createAutoCloseFunctionality = () => {
+const tabLooping = () => {
   setInterval(async () => {
-    if (!autoCloseEnabled) return;
-
-    const closeAfterMillis = (autoCloseTime.minutes * 60 + autoCloseTime.seconds) * 1000;
-
     const tabs = await new Promise((resolve) => chrome.tabs.query({}, resolve));
     const now = Date.now();
 
     for (const tab of tabs) {
-      console.log(`Checking tab: ${tab.title}`);
-      // Update lastAccessed if the tab is active
-      if (tab.active) {
-        tabAccessTimes[tab.id] = now; // Update last accessed time
-      }
-
-      // Check if the tab is not pinned and not in a pinned group
-      if (!tab.active && !tab.pinned) {
-        const inPinnedGroup = tab.groupId != -1 && (await isPinnedGroup(tab.groupId));
-        const lastAccessed = tabAccessTimes[tab.id] || tab.lastAccessed; 
-        if (!inPinnedGroup && (now - lastAccessed) > closeAfterMillis) {
-          chrome.tabs.remove(tab.id, () => {
-            console.log(`Closed tab: ${tab.title}`);
-          });
-        }
-      }
-    }
-  }, 1000); // Check every 1 seconds
-};
-
-chrome.storage.onChanged.addListener((changes) => {
-  if (changes.autoCloseEnabled) {
-      autoCloseEnabled = changes.autoCloseEnabled.newValue;
+      
+      // auto close functionality 
       if (autoCloseEnabled) {
-          createAutoCloseFunctionality();
-      } else {
-        chrome.storage.local.set({ autoCloseTime: { minutes: 120, seconds: 0 } });
-        autoCloseTime = { minutes: 120, seconds: 0 };          
-      }
-  }
-  if (changes.autoCloseTime) {
-      autoCloseTime = changes.autoCloseTime.newValue;
-  }
-});
-
-/* End Auto Close Functionality */
-
-/* Start Lazy Loading Functionality */
-
-const loadLazyLoadingSettings = async () => {
-  const result = await chrome.storage.local.get(['lazyLoadingEnabled']);
-  lazyLoadingEnabled = result.lazyLoadingEnabled || false;
-};
-
-/* End Lazy Loading Functionality */
-
-/* Start Auto Grouping Functionality */
-
-/**
- * Initialize tab groups from storage and group existing tabs
- * @returns {Promise<void>}
- */
-const initializeTabGroups = async () => {
-  // Initialize tab groups from storage on extension startup
-chrome.storage.local.get('tabGroups', (result) => {
-  const groups = result.tabGroups || [];
-  groups.forEach(group => {
-    const groupKey = group.name + group.color;
-    // Store group information, including patterns, title, and color
-    activeGroups[groupKey] = {
-      id: null,          // Prepare to store group IDs later
-      title: group.name, // Store the group title
-      color: group.color, // Store the group color
-      patterns: group.patterns || [] // Extract patterns here
-    };
-  });
-});
-
-// Listener for changes in stored tab groups
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes.tabGroups) {
-    const newGroups = changes.tabGroups.newValue || [];
-
-    // Create a map for quick lookup of new groups
-    const newGroupMap = {};
-    newGroups.forEach(group => {
-      const groupKey = group.name + group.color;
-      newGroupMap[groupKey] = group;
-    });
-
-    // Check for removed or updated groups
-    for (const groupKey in activeGroups) {
-      const currentGroup = activeGroups[groupKey];
-
-      if (!(groupKey in newGroupMap)) {
-        // The group has been removed
-        ungroupTabs(currentGroup.id); // Ungroup its tabs based on the group's ID
-        delete activeGroups[groupKey]; // Remove from activeGroups
-        delete tabGroupMap[groupKey]; // Remove from tabGroupMap
-      } else {
-        // The group exists in newGroups, check for updates
-        const newGroup = newGroupMap[groupKey];
-
-        // Check if the patterns have changed
-        if (JSON.stringify(currentGroup.patterns) !== JSON.stringify(newGroup.patterns)) {
-          // Patterns have changed, update the current group
-          currentGroup.patterns = newGroup.patterns || [];
-
-          // Re-evaluate and update the tabs associated with this group
-          chrome.tabs.query({}, (tabs) => {
-            const groupedTabs = tabs.filter(tab => tab.groupId === currentGroup.id);
-            groupedTabs.forEach(tab => {
-              if (!newGroup.patterns.some(pattern => urlMatchesPattern(tab.url, pattern))) {
-                // If the tab no longer matches any pattern, ungroup it
-                chrome.tabs.ungroup(tab.id);
-              }
-            });
-
-            // Group any ungrouped tabs that now match the updated patterns
-            tabs.forEach(tab => {
-              if (tab.groupId !== currentGroup.id && newGroup.patterns.some(pattern => urlMatchesPattern(tab.url, pattern))) {
-                groupTab(tab);
-              }
-            });
-          });
-        }
-
-        // Preserve the group ID and other attributes if not changed
-        currentGroup.title = newGroup.name; // Update title if changed
-        currentGroup.color = newGroup.color; // Update color if changed
-      }
-    }
-
-    // Add new groups
-    newGroups.forEach(group => {
-      const groupKey = group.name + group.color;
-      if (!(groupKey in activeGroups)) {
-        // Store new group information
-        activeGroups[groupKey] = {
-          id: null,          // Prepare to store group IDs later
-          title: group.name, // Store the group title
-          color: group.color, // Store the group color
-          patterns: group.patterns || [] // Extract patterns here
-        };
-
-        // Group existing tabs based on new patterns
-        chrome.tabs.query({}, (tabs) => {
-          tabs.forEach(tab => {
-            if (group.patterns.some(pattern => urlMatchesPattern(tab.url, pattern))) {
-              groupTab(tab); // Group the tab if it matches the new group's patterns
-            }
-          });
-        });
-      }
-    });
-  }
-});
-
-// Function to ungroup tabs based on group ID
-function ungroupTabs(groupId) {
-  // Logic to find and ungroup all tabs that belong to this group
-  chrome.tabs.query({}, (tabs) => {
-    tabs.forEach(tab => {
-      if (tab.groupId === groupId) {
-        chrome.tabs.ungroup(tab.id);
-      }
-    });
-  });
-}
-
-// Function to handle tab grouping based on saved patterns
-function handleTabGrouping(tab) {
-  // Check if the tab is pinned
-  if (tab.pinned) {
-    return; // Skip grouping for pinned tabs
-  }
-
-  // Check if auto grouping is enabled
-  chrome.storage.local.get('autoGroupingEnabled', (result) => {
-    const autoGroupingEnabled = result.autoGroupingEnabled;
-
-    if (autoGroupingEnabled) {
-      // Check if the tab is already in a group
-      if (tab.groupId !== -1) {
-        // Check if the existing group is in activeGroups (auto-created group)
-        const existingGroupKey = Object.keys(activeGroups).find(key => activeGroups[key].id === tab.groupId);
-        
-        // If it's an auto-created group, proceed with grouping logic
-        if (existingGroupKey) {
-          groupTab(tab);
-        }
-      } else {
-        // Proceed with grouping logic since the tab is not in a group
-        groupTab(tab);
-      }
-    } else {
-      // Ungroup the tab from any previous groups if auto grouping is disabled
-      removeTabFromPreviousGroups(tab.id);
-    }
-  });
-}
-
-// Function to group the tab based on saved patterns
-function groupTab(tab) {
-  // Loop through active groups to find matching patterns
-  for (const groupKey in activeGroups) {
-    const group = activeGroups[groupKey];
-    const groupPatterns = group.patterns; // Ensure that patterns are accessible from activeGroups
-
-    if (groupPatterns && groupPatterns.some(pattern => urlMatchesPattern(tab.url, pattern))) {
-      // If the group ID is not cached, find or create it
-      if (!group.id) {
-        chrome.tabGroups.query({}, (existingGroups) => {
-          const matchedGroup = existingGroups.find(g => g.title === group.title && g.color === group.color);
-
-          if (matchedGroup) {
-            // Cache the groupId and add the tab to the matched group
-            group.id = matchedGroup.id;
-            chrome.tabs.group({ tabIds: [tab.id], groupId: matchedGroup.id });
-            // Update tabGroupMap
-            tabGroupMap[tab.id] = groupKey; 
-          } else {
-            // Create a new group and cache the groupId
-            chrome.tabs.group({ tabIds: [tab.id] }, (newGroupId) => {
-              chrome.tabGroups.update(newGroupId, { title: group.title, color: group.color }, () => {
-                group.id = newGroupId; // Cache the new group's ID
-                // Update tabGroupMap
-                tabGroupMap[tab.id] = groupKey; 
-                // Group other tabs that match the same patterns with the new group ID
-                reGroupMatchingTabs(newGroupId, group.patterns);
-              });
+        // Update lastAccessed if the tab is active
+        if (tab.active) {
+          tabAccessTimes[tab.id] = now;
+        } else if (!tab.pinned) {
+          // Check if the tab is not pinned and not in a pinned group
+          const inPinnedGroup = tab.groupId != -1 && (await isPinnedGroup(tab.groupId));
+          const lastAccessed = tabAccessTimes[tab.id] || tab.lastAccessed; 
+          // if not active or pinned or in pinned group, close the tab
+          if (!inPinnedGroup && (now - lastAccessed) > (autoCloseTime.minutes * 60 + autoCloseTime.seconds) * 1000) {
+            chrome.tabs.remove(tab.id, () => {
+              console.log(`Closed tab: ${tab.title}`);
             });
           }
-        });
-      } else {
-        // The group ID is already cached, add the tab to it
-        chrome.tabs.group({ tabIds: [tab.id], groupId: group.id });
-        // Update tabGroupMap
-        tabGroupMap[tab.id] = groupKey; 
+        }
       }
 
-      break; // Break after grouping the tab into the first matching group
+      // auto sleep functionality (suspand tab)
+      if (autoSleepEnabled && !tab.discarded) {
+        // Update lastAccessed if the tab is active
+        if (tab.active) {
+          tabAccessTimes[tab.id] = now;
+        } else {
+          // if not active check last accessed time
+          const lastAccessed = tabAccessTimes[tab.id] || tab.lastAccessed; 
+          // check if last accessed time is greater than auto sleep time to suspand tab
+          if ((now - lastAccessed) > (autoSleepTime.minutes * 60 + autoSleepTime.seconds) * 1000) {
+            // suspand tab
+            chrome.tabs.discard(tab.id);
+            console.log(`Suspended tab: ${tab.title}`);
+          }
+        }
+      }
+
+      // auto group functionality
+      if (autoGroupingEnabled && !GroupingFunctioning) {
+        await handleTabGrouping(tab);
+        GroupingFunctioning = false;
+      }
     }
-  }
+  }, 1000);
 }
 
-// Function to re-group other matching tabs with the same group ID
-function reGroupMatchingTabs(groupId, patterns) {
-  chrome.tabs.query({}, (tabs) => {
-    tabs.forEach(tab => {
-      if (tab.groupId !== groupId && patterns.some(pattern => urlMatchesPattern(tab.url, pattern))) {
-        chrome.tabs.group({ tabIds: [tab.id], groupId: groupId });
-        tabGroupMap[tab.id] = Object.keys(activeGroups).find(key => activeGroups[key].id === groupId); // Update tabGroupMap
-      }
-    });
+/* End Tab Looping */
+
+const matchesPattern = (url, patterns) => {
+  return patterns.some(pattern => {
+    // This can be modified based on your pattern matching requirements
+    const regex = new RegExp(pattern.replace(/\*/g, '.*')); // Simple wildcard support
+    return regex.test(url);
   });
-}
-
-// Utility function to check if a URL matches a given pattern
-function urlMatchesPattern(url, pattern) {
-  const regex = new RegExp(pattern); // Example: using regex for pattern matching
-  return regex.test(url);
-}
-
-// Function to remove a tab from previous groups
-function removeTabFromPreviousGroups(tabId) {
-  const previousGroupKey = tabGroupMap[tabId];
-  if (previousGroupKey) {
-    chrome.tabs.ungroup(tabId);
-    delete tabGroupMap[tabId]; // Remove from tabGroupMap
-  }
-}
-
-// Listener for when a new tab is created
-chrome.tabs.onCreated.addListener((tab) => {
-  handleTabGrouping(tab); // Handle grouping for the new tab
-});
-
-// Listener for when a tab is updated
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url) {
-    handleTabGrouping(tab); // Handle grouping for the tab when it's fully loaded
-  }
-});
-
-// Listener for when a tab is removed
-chrome.tabs.onRemoved.addListener((tabId) => {
-  // Clean up the tabGroupMap for the removed tab
-  delete tabGroupMap[tabId];
-});
 };
 
-/* End Auto Grouping Functionality */
+let isGrouping = false; // Lock variable
+
+const handleTabGrouping = async (tab) => {
+  // Wait until the lock is released
+  while (isGrouping) {
+    await new Promise(resolve => setTimeout(resolve, 50)); // Polling with a short delay
+  }
+
+  isGrouping = true; // Acquire the lock
+
+  try {
+    // Check if the tab is in an auto group
+    const inAutoGroup = autoGroups.some(group => tab.groupId === group.idInChrome);
+
+    // Skip if the tab is already in a group
+    if (tab.groupId !== -1 && !inAutoGroup) {
+      console.log(`Tab ${tab.title} is already in a group, skipping.`);
+      return; // Release lock before returning
+    }
+
+    // Check if the tab is pinned
+    const isTabPinned = tab.pinned || (tab.groupId !== -1 && await isPinnedGroup(tab.groupId));
+    if (isTabPinned) {
+      console.log(`Tab ${tab.title} is pinned, skipping grouping.`);
+      return; // Release lock before returning
+    } 
+
+    // Get existing tab groups from storage
+    const result = await chrome.storage.local.get(['tabGroups']);
+    const groups = result.tabGroups || [];
+
+    let existingGroupId = null;
+
+    // Iterate through defined groups
+    for (const group of autoGroups) {
+      if (matchesPattern(tab.url, group.patterns)) {
+        console.log(`Tab ${tab.title} matches group: ${group.title}, id: ${group.id}, chrome id: ${group.idInChrome}`);
+
+        // Check if the group ID in Chrome is valid
+        const existingGroups = await chrome.tabGroups.query({});
+        const isValidGroupId = group.idInChrome && existingGroups.some(existingGroup => existingGroup.id === group.idInChrome);
+
+        if (isValidGroupId) {
+          // If the group ID is valid, add the tab to that group
+          try {
+            await chrome.tabs.group({ tabIds: [tab.id], groupId: group.idInChrome });
+            console.log(`Added tab ${tab.title} to existing group ${group.title} with chrome id: ${group.idInChrome}`);
+          } catch (error) {
+            console.error(`Error adding tab ${tab.title} to group ${group.idInChrome}:`, error);
+          }
+          return; // Release lock before returning
+        } else {
+          // Save the group ID for later use if no valid group exists
+          existingGroupId = group.id;
+          break; // Exit the loop once a match is found
+        }
+      }
+    }
+
+    // Create a new tab group if no existing group is found
+    if (existingGroupId) {
+      try {
+        const groupId = await chrome.tabs.group({ tabIds: [tab.id] }); // Create a new group
+        await chrome.tabGroups.update(groupId, { title: autoGroups.find(g => g.id === existingGroupId).title, color: autoGroups.find(g => g.id === existingGroupId).color }); // Update the group
+
+        // Update storage with the new group ID
+        const updatedGroups = groups.map(existingGroup => {
+          if (existingGroup.id === existingGroupId) {
+            return { ...existingGroup, idInChrome: groupId }; // Update idInChrome
+          }
+          return existingGroup; // Return unchanged group
+        });
+
+        await chrome.storage.local.set({ tabGroups: updatedGroups });
+        console.log(`Updated storage for tab group with id ${groupId}:`, updatedGroups);
+      } catch (error) {
+        console.error(`Error creating/updating group for tab ${tab.title}:`, error);
+      }
+    }
+
+  } finally {
+    isGrouping = false; // Release the lock
+  }
+};
+
+/**
+ * Ungroup all groups in the autoGroups array
+ * @returns {Promise<void>}
+ */
+const ungroupAutoGroups = async () => {
+  try {
+    // Iterate through each auto group
+    for (const group of autoGroups) {
+      // Fetch all tabs in the current group
+      const tabsInGroup = await chrome.tabs.query({ groupId: group.idInChrome });
+      
+      // Ungroup each tab in the group
+      for (const tab of tabsInGroup) {
+        await new Promise((resolve) => {
+          chrome.tabs.ungroup(tab.id, resolve); // Ungroup the tab
+        });
+        console.log(`Ungrouped tab with ID: ${tab.id} from group ID: ${group.idInChrome}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error ungrouping auto groups:', error);
+  }
+};

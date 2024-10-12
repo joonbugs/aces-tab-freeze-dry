@@ -348,15 +348,10 @@ input[type="number"] {
     font-size: 0.9rem;
 }
 
-#optionsContent .editTimeBtn, #optionsContent .submitTimeBtn {
-    
-}
-
 /* End options section styles */
 
 
 /* Dark mode styles */
-
 
 
 
@@ -374,3 +369,19 @@ input[type="number"] {
 .color-circle.selected {
     border: 2px solid black;
 }
+
+
+.group-color-circle {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.patterns-list {
+    list-style-type: none;
+    padding-left: 20px;
+    margin: 5px 0;
+}
+
