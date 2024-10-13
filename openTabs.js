@@ -143,14 +143,14 @@ function renderTabs(tabList, groupTitle, containerClass, groupColor = null, grou
         const buttonContainer = document.createElement('div');
         buttonContainer.classList.add('button-container'); // Container for group buttons
 
+        const pinGroupButton = createPinGroupButton(groupId, groupTitle, groupColor, tabList);
+        buttonContainer.appendChild(pinGroupButton);
+
         const ungroupButton = createUngroupButton(groupId, groupContainer, tabList);
         buttonContainer.appendChild(ungroupButton); // Place ungroup button in the container
 
         const closeButton = createCloseGroupButton(groupId, groupContainer);
         buttonContainer.appendChild(closeButton); // Place close button in the container
-
-        const pinGroupButton = createPinGroupButton(groupId, groupTitle, groupColor, tabList);
-        buttonContainer.appendChild(pinGroupButton);
 
         tabsContainer.appendChild(buttonContainer); // Add the button container to tabs container
     }
@@ -440,6 +440,15 @@ function createPinGroupButton(groupId, groupTitle, groupColor, tabList) {
         const isPinned = !!pinnedGroups[groupId];
 
         pinGroupButton.textContent = isPinned ? 'Unpin Group' : 'Pin Group';
+
+        if (isPinned) {
+            pinGroupButton.classList.remove('green-button');
+            pinGroupButton.classList.add('red-button');
+            
+        } else {
+            pinGroupButton.classList.add('green-button');
+            pinGroupButton.classList.remove('red-button');
+        }
     });
 
     pinGroupButton.addEventListener('click', () => {
@@ -451,11 +460,15 @@ function createPinGroupButton(groupId, groupTitle, groupColor, tabList) {
                 // Unpin the group
                 delete pinnedGroups[groupId];
                 pinGroupButton.textContent = 'Pin Group';
+                pinGroupButton.classList.add('green-button');
+                pinGroupButton.classList.remove('red-button');
             } else {
                 // Pin the group
                 const groupTabs = tabList.map((tab) => ({ id: tab.id, url: tab.url }));
                 pinnedGroups[groupId] = { title: groupTitle, tabs: groupTabs, color: groupColor };
                 pinGroupButton.textContent = 'Unpin Group';
+                pinGroupButton.classList.remove('green-button');
+                pinGroupButton.classList.add('red-button');
             }
 
             // Save the updated pinned groups to storage
