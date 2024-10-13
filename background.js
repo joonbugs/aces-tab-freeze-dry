@@ -7,6 +7,7 @@ let autoSleepTime = { minutes: 60, seconds: 0 }; // Default time
 let autoGroupingEnabled = false;
 let autoGroups = [];
 let GroupingFunctioning = false;
+let allowManualGroupAccess = false;
 
 // Listen for when the extension is installed and open a welcome tab 
 chrome.runtime.onInstalled.addListener(({ reason }) => {
@@ -33,7 +34,7 @@ chrome.runtime.onStartup.addListener(async () => {
 
 const getVaribales = async () => {
   try {
-    const result = await chrome.storage.local.get(['autoCloseEnabled', 'autoCloseTime', 'lazyLoadingEnabled', 'autoSleepEnabled', 'autoSleepTime', 'autoGroupingEnabled', 'tabGroups']);
+    const result = await chrome.storage.local.get(['autoCloseEnabled', 'autoCloseTime', 'lazyLoadingEnabled', 'autoSleepEnabled', 'autoSleepTime', 'autoGroupingEnabled', 'tabGroups', 'allowManualGroupAccess']);
     autoCloseEnabled = result.autoCloseEnabled || false;
     autoCloseTime = result.autoCloseTime || { minutes: 120, seconds: 0 };
     lazyLoadingEnabled = result.lazyLoadingEnabled || false;
@@ -41,7 +42,8 @@ const getVaribales = async () => {
     autoSleepTime = result.autoSleepTime || { minutes: 60, seconds: 0 };
     autoGroupingEnabled = result.autoGroupingEnabled || false;
     autoGroups = result.tabGroups || [];
-    console.log('Variables Loaded', autoCloseEnabled, autoCloseTime, lazyLoadingEnabled, autoSleepEnabled, autoSleepTime, autoGroupingEnabled, autoGroups);
+    allowManualGroupAccess = result.allowManualGroupAccess || false;
+    console.log('Variables Loaded', autoCloseEnabled, autoCloseTime, lazyLoadingEnabled, autoSleepEnabled, autoSleepTime, autoGroupingEnabled, autoGroups, allowManualGroupAccess);
   } catch (error) {
     console.error('Error getting variables from storage:', error);
   }
@@ -78,7 +80,11 @@ chrome.storage.onChanged.addListener(async (changes) => {
     autoGroups = changes.tabGroups.newValue;
   }
 
-  console.log('Variables Changed', autoCloseEnabled, autoCloseTime, lazyLoadingEnabled, autoSleepEnabled, autoSleepTime, autoGroupingEnabled, autoGroups);
+  if (changes.allowManualGroupAccess) {
+    allowManualGroupAccess = changes.allowManualGroupAccess.newValue;
+  }
+
+  console.log('Variables Changed', autoCloseEnabled, autoCloseTime, lazyLoadingEnabled, autoSleepEnabled, autoSleepTime, autoGroupingEnabled, autoGroups, allowManualGroupAccess);
 });
 
 /* End of listensers when global variables change in storage */
@@ -342,10 +348,10 @@ const handleTabGrouping = async (tab) => {
 
   try {
     // Check if the tab is in an auto group
-    const inAutoGroup = autoGroups.some(group => tab.groupId === group.idInChrome);
+    const inAutoGroup =  (autoGroups.some(group => tab.groupId === group.idInChrome));
 
-    // Skip if the tab is already in a group
-    if (tab.groupId !== -1 && !inAutoGroup) {
+    // Skip if the tab is already in a group and the allowManualGroupAccess is not enabled
+    if (tab.groupId !== -1 && !inAutoGroup && !allowManualGroupAccess) {
       console.log(`Tab ${tab.title} is already in a group, skipping.`);
       return; // Release lock before returning
     }
@@ -423,6 +429,9 @@ const ungroupAutoGroups = async () => {
   try {
     // Iterate through each auto group
     for (const group of autoGroups) {
+      if (group.idInChrome === null) {
+        continue; // Skip if idInChrome is null
+      }
       // Fetch all tabs in the current group
       const tabsInGroup = await chrome.tabs.query({ groupId: group.idInChrome });
       
@@ -434,6 +443,24 @@ const ungroupAutoGroups = async () => {
         console.log(`Ungrouped tab with ID: ${tab.id} from group ID: ${group.idInChrome}`);
       }
     }
+
+    // Update all autoGroups to set idInChrome to null
+    autoGroups.forEach(group => {
+      group.idInChrome = null; // Set idInChrome to null for each group
+    });
+
+    // Save the updated autoGroups back to storage
+    await new Promise((resolve, reject) => {
+      chrome.storage.local.set({ autoGroups }, () => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          console.log('Updated idInChrome to null for all groups in storage');
+          resolve();
+        }
+      });
+    });
+
   } catch (error) {
     console.error('Error ungrouping auto groups:', error);
   }

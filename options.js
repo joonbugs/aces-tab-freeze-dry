@@ -2,19 +2,28 @@ function loadOptions() {
     console.log('Options Loaded');
 
     // Load initial settings from storage
-    chrome.storage.local.get(['autoCloseEnabled', 'autoCloseTime', 'autoSleepEnabled', 'autoSleepTime', 'lazyLoadingEnabled'], (result) => {
+    chrome.storage.local.get([
+        'autoCloseEnabled',
+        'autoCloseTime',
+        'autoSleepEnabled',
+        'autoSleepTime', 
+        'lazyLoadingEnabled',
+        'allowManualGroupAccess',
+    ], (result) => {
         const { 
             autoCloseEnabled = false, 
             autoCloseTime = { minutes: 120, seconds: 0 }, 
             autoSleepEnabled = false, 
             autoSleepTime = { minutes: 60, seconds: 0 }, 
-            lazyLoadingEnabled = false 
+            lazyLoadingEnabled = false,
+            allowManualGroupAccess = false
         } = result;
 
         // Set the checkbox states
         document.getElementById('autoCloseCheckbox').checked = autoCloseEnabled;
         document.getElementById('autoSleepCheckbox').checked = autoSleepEnabled;
         document.getElementById('lazyLoadingCheckbox').checked = lazyLoadingEnabled;
+        document.getElementById('allowManualGroupAccessCheckbox').checked = allowManualGroupAccess;
 
         // Set the time inputs
         document.getElementById('autoCloseMinutes').value = autoCloseTime.minutes;
@@ -37,6 +46,7 @@ function loadOptions() {
     document.getElementById('editSleepTimeBtn').addEventListener('click', toggleSleepEdit);
     document.getElementById('submitSleepTimeBtn').addEventListener('click', saveSleepTimeSettings);
     document.getElementById('lazyLoadingCheckbox').addEventListener('change', handleLazyLoadChange);
+    document.getElementById('allowManualGroupAccessCheckbox').addEventListener('change', handleManualGroupAccessChange);
 }
 
 function handleCheckboxChange(event) {
@@ -149,4 +159,13 @@ function handleLazyLoadChange(event) {
     const isChecked = event.target.checked;
     // Save the new state to storage
     chrome.storage.local.set({ lazyLoadingEnabled: isChecked });
+}
+
+function handleManualGroupAccessChange(event) {
+    const isChecked = event.target.checked;
+
+    // Save the new state to storage
+    chrome.storage.local.set({ allowManualGroupAccess: isChecked }, () => {
+        console.log('Allow Manual Group Access option updated:', isChecked);
+    });
 }
