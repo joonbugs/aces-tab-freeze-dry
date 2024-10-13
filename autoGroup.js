@@ -76,6 +76,16 @@ const autoGroup = async () => {
   // Load saved groups into the UI
   function loadSavedGroups(groups) {
     savedGroupsList.innerHTML = ''; // Clear existing items
+
+    if (groups.length === 0) {
+      // If there are no saved groups, show a message
+      const noGroupsMessage = document.createElement('p');
+      noGroupsMessage.textContent = 'No groups saved yet.';
+      noGroupsMessage.classList.add('no-groups-message'); // Optional: Add a class for styling
+      savedGroupsList.appendChild(noGroupsMessage);
+      return; // Exit the function if there are no groups to display
+    }
+
     groups.forEach(group => {
         const listItem = document.createElement('li');
 

@@ -305,7 +305,7 @@ const tabLooping = () => {
       }
 
       // auto group functionality
-      if (autoGroupingEnabled && !GroupingFunctioning) {
+      if (autoGroupingEnabled && !GroupingFunctioning && autoGroups.length > 0) {
         await handleTabGrouping(tab);
         GroupingFunctioning = false;
       }
