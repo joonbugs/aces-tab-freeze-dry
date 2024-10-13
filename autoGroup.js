@@ -9,6 +9,9 @@ const autoGroup = async () => {
   const groupNameInput = document.getElementById('groupName');
   const colorPickerCircles = document.querySelectorAll('.color-circle');
   const savedGroupsList = document.getElementById('savedGroupsList');
+  const getDomainBtn = document.getElementById('getDomainBtn');
+  const getSubdomainBtn = document.getElementById('getSubdomainBtn');
+  const getExactUrlBtn = document.getElementById('getExactUrlBtn');
 
   let selectedColor = 'grey'; // Default color
   let patterns = []; // Array to hold patterns
@@ -75,17 +78,44 @@ const autoGroup = async () => {
     savedGroupsList.innerHTML = ''; // Clear existing items
     groups.forEach(group => {
         const listItem = document.createElement('li');
-        
+
+        // Create a div to wrap color circle and title
+        const colorAndTitleDiv = document.createElement('div');
+        colorAndTitleDiv.classList.add('color-title-wrapper'); // Apply CSS class for styling
+
         // Create color circle
         const colorCircle = document.createElement('span');
         colorCircle.classList.add('group-color-circle'); // Apply CSS class for styling
         colorCircle.style.backgroundColor = group.color; // Set the background color to the group's color
-        
-        // Add the color circle and group title
-        listItem.appendChild(colorCircle);
-        const titleText = document.createTextNode(group.title);
-        listItem.appendChild(titleText);
-        
+
+        // Create the title text
+        const titleText = document.createElement('span');
+        titleText.classList.add('group-title');
+        titleText.textContent = group.title;
+
+        // Add the color circle and group title to the colorAndTitleDiv
+        colorAndTitleDiv.appendChild(colorCircle);
+        colorAndTitleDiv.appendChild(titleText);
+
+        // Create another div to hold color/title div and delete button
+        const groupInfoDiv = document.createElement('div');
+        groupInfoDiv.classList.add('group-info-wrapper'); // Apply CSS class for styling
+
+        // Append colorAndTitleDiv to groupInfoDiv
+        groupInfoDiv.appendChild(colorAndTitleDiv);
+
+        // Create delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.classList.add('delete-button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', () => deleteGroup(group.id));
+
+        // Add the delete button to groupInfoDiv
+        groupInfoDiv.appendChild(deleteBtn);
+
+        // Add the groupInfoDiv to the listItem
+        listItem.appendChild(groupInfoDiv);
+
         // Create patterns list
         const patternsList = document.createElement('ul');
         patternsList.classList.add('patterns-list'); // Apply CSS class for styling
@@ -94,20 +124,15 @@ const autoGroup = async () => {
             patternItem.textContent = pattern;
             patternsList.appendChild(patternItem);
         });
-        
+
         // Add the patterns list to the list item
         listItem.appendChild(patternsList);
-        
-        // Create delete button
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.addEventListener('click', () => deleteGroup(group.id));
-        listItem.appendChild(deleteBtn);
-        
+
         // Add listItem to the savedGroupsList
         savedGroupsList.appendChild(listItem);
     });
-  }
+}
+
 
 
   // Delete group
@@ -164,6 +189,7 @@ const autoGroup = async () => {
         listItem.textContent = pattern;
         const removeBtn = document.createElement('button');
         removeBtn.textContent = 'Remove';
+        removeBtn.classList.add('clear-btn');
         removeBtn.addEventListener('click', () => {
             patterns = patterns.filter(p => p !== pattern);
             updatePatternList();
@@ -187,6 +213,63 @@ const autoGroup = async () => {
         grayCircle.classList.add('selected');
     }
   }
+
+  // Function to extract the domain (without subdomain)
+  function extractDomain(url) {
+    try {
+        const hostname = new URL(url).hostname;
+        const parts = hostname.split('.');
+        // Get the last two parts (e.g., "example.com" from "sub.example.com")
+        return parts.slice(-2).join('.');
+    } catch (error) {
+        console.error('Invalid URL:', error);
+        return null;
+    }
+  }
+
+
+  // Function to extract the domain with subdomain
+  function extractSubdomain(url) {
+    try {
+        const hostname = new URL(url).hostname;
+        return hostname; // Return the full hostname including subdomain
+    } catch (error) {
+        console.error('Invalid URL:', error);
+        return null;
+    }
+  }
+
+  // Get the domain of the active tab
+  getDomainBtn.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs.length > 0) {
+            const activeTab = tabs[0];
+            const domain = extractDomain(activeTab.url);
+            patternInput.value = domain; // Set the pattern input value
+        }
+    });
+  });
+
+  // Get the subdomain of the active tab
+  getSubdomainBtn.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs.length > 0) {
+            const activeTab = tabs[0];
+            const subdomain = extractSubdomain(activeTab.url);
+            patternInput.value = subdomain; // Set the pattern input value
+        }
+    });
+  });
+
+  // Get the exact URL of the active tab
+  getExactUrlBtn.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs.length > 0) {
+            const activeTab = tabs[0];
+            patternInput.value = activeTab.url; // Set the pattern input value to the exact URL
+        }
+    });
+  });
 
   // Load saved groups initially
   loadSavedGroups(tabGroups);
