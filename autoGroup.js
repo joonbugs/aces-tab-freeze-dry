@@ -212,6 +212,7 @@ const autoGroup = async () => {
   // Clear form inputs
   function clearForm() {
     groupNameInput.value = '';
+    patternInput.value = '';
     patterns = [];
     updatePatternList();
     selectedColor = 'grey';
