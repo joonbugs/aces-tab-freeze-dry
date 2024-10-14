@@ -100,6 +100,15 @@ const migratePinnedGroups = async () => {
   const createTabGroup = async (title, tabs, color, oldGroupId) => {
     const createdTabIds = [];
     let positionIndex = 0;
+
+    // Check if the pinned group already exists in Chrome's active tab groups
+    const existingGroups = await chrome.tabGroups.query({});
+    const isGroupAlreadyPinned = existingGroups.some(group => group.id === parseInt(oldGroupId));
+
+    if (isGroupAlreadyPinned) {
+      console.log(`Group with ID ${oldGroupId} already exists. Skipping creation.`);
+      return; // Skip creating the group
+    }
   
     // Create an array of promises for tab creation
     const tabCreationPromises = tabs.map((tabInfo) => {

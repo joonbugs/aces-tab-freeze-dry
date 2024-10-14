@@ -16,6 +16,7 @@ body {
     margin: 0;
     padding: 1.5rem;
     font-size: .75rem;
+    background: #f3f3f3;
 }
 
 h1{
@@ -36,12 +37,12 @@ button {
 
 .green-button {
     background: green;
-    color: #fff;
+    color: #f3f3f3;
 }
 
 .red-button {
     background-color: #f44336;
-    color: #fff;
+    color: #f3f3f3;
 }
 
 .green-button:hover, .red-button:hover{
@@ -79,11 +80,11 @@ button {
 .nav-tab--active {
     background-color: #3849a2;
     font-weight: bold;
-    color: #fff;
+    color: #f3f3f3;
 }       
 
 .nav-tab--active:hover {
-    color: #fff;
+    color: #f3f3f3;
 }
 
 .popup-content {    
@@ -129,7 +130,7 @@ button {
     padding: 8px;
     border-bottom: 1px solid #cccccc;
     margin-bottom: 8px;
-    background-color: #ffffff;
+    background-color: #f3f3f3;
     cursor: pointer;
 }
 
@@ -222,7 +223,7 @@ button {
 
 .ungroup-button:hover, .close-group-button {
     background-color: #f44336;
-    color: #fff;
+    color: #f3f3f3;
 }
 
 .ungroup-button:hover, .close-group-button:hover {
