@@ -1,18 +1,30 @@
-# Tab Manager Extension
-A Chrome extension to efficiently manage your browser tabs.
+![HTML Badge](https://img.shields.io/badge/HTML-5-orange) ![CSS Badge](https://img.shields.io/badge/CSS-3-blue) ![JavaScript Badge](https://img.shields.io/badge/JavaScript-ES6-yellow) ![Open Source Love Badge](https://badges.frapsoft.com/os/v1/open-source.svg?v=103) ![MIT License Badge](https://img.shields.io/badge/license-MIT-green)
+# Tab Manager Chrome Extension
+A Chrome extension to efficiently manage and organize your browser tabs, helping you stay focused, reduce memory usage, and keep track of your open tabs.
 
 ## Table of Contents
+- [Overview](#overview)
+- [Demo Video](#demo-video)
 - [Installation](#installation)
 - [What is a Chrome Extension?](#what-is-a-chrome-extension)
-- [Key Features & Tabs Description](#key-features--tabs-description)
+- [Key Features](#key-features)
 - [File Structure](#file-structure)
-- [Demo Video](#demo-video)
+- [Contributing](#contributing)
+- [Tech Stack](#tech-stack)
+- [License](#license)
+
+## Overview
+Managing too many open tabs can quickly become overwhelming, slowing down your browser and making it difficult to stay organized. **Tab Manager Extension** helps you group, mute, sleep, and restore tabs, ensuring you never lose track of your work.
+
+## Demo Video
+[Link to the demo video here](https://drive.google.com/file/d/1bEkgMOSpTxdjp2_MOajCE4XS1l_BZrmO/view?usp=drive_link)
 
 ## Installation
+To install the extension locally for development or personal use:
 1. Download the extension files.
-2. Go to Chrome Extensions (chrome://extensions/).
-3. Enable "Developer mode."
-4. Click "Load unpacked" and select the extension folder.
+2. Go to [Chrome Extensions](chrome://extensions/).
+3. Enable **Developer mode** (toggle in the upper right corner).
+4. Click **Load unpacked** and select the extension folder.
 
 ## What is a Chrome Extension?
 Chrome extensions are small software programs that customize the browsing experience. They enable users to tailor Chrome's functionality and behavior to their individual needs or preferences. Extensions can modify the user interface, enhance web pages, or add new features.
@@ -26,12 +38,14 @@ Chrome extensions are small software programs that customize the browsing experi
 
 - **Manifest File**: A JSON file that contains metadata about the extension, including its name, version, permissions, and other settings. The manifest file is essential for defining how the extension interacts with the browser.
 
-## Key Features & Tabs Description
+## Key Features
 The Extension is divided into four main tabs:
 - **Open Tabs**: Displays all your open tabs, organized into pinned, ungrouped, and grouped categories. Users can click to access tabs, view the last visited time, and control options like sleep, mute, or close.
 - **Auto Group**: Automatically groups tabs based on user-defined URL patterns, making it easier to manage multiple tabs.
-- **Sessions**: Manage saved tab sessions (currently in development), allowing users to restore groups of tabs for different tasks or projects.
+- **Sessions**: Manage saved tab sessions, allowing users to restore groups of tabs for different tasks or projects.
 - **Options**: Configure tab management preferences and features to suit your workflow.
+
+> **Note:** The **Sessions** tab is not developed yet and currently not shown in the popup UI.
 
 ## File Structure
 ```
@@ -47,5 +61,40 @@ TabManagerExtension/
 └── icons/                  # Folder for extension icons
 ```
 
-## Demo Video
-[Link to the demo video here](https://drive.google.com/file/d/1bEkgMOSpTxdjp2_MOajCE4XS1l_BZrmO/view?usp=drive_link)
+## Contributing
+
+We welcome contributions! Here's how you can get started:
+
+1. **Fork** this repository.
+2. **Clone** the forked repository to your local machine:
+    ```bash
+    git clone https://github.com/MaryEhb/tab-manager-chrome-extension.git
+    ```
+3. Create a new branch for your changes:
+    ```bash
+    git checkout -b my-new-feature
+    ```
+4. Make your changes and commit them:
+    ```bash
+    git commit -m "Add new feature"
+    ```
+5. Push to the branch:
+    ```bash
+    git push origin my-new-feature
+    ```
+6. Open a pull request and describe what you've changed.
+
+### Setting Up for Development
+- Load the extension as described in the [Installation](#installation) section.
+- Since the project is focused on pure HTML, CSS, and JavaScript, no build steps are required, keeping it simple for beginners.
+
+### Issues and Feature Requests
+Feel free to report any issues or feature requests via the [issues page](https://github.com/MaryEhb/tab-manager-chrome-extension/issues).
+
+## Tech Stack
+- **HTML/CSS/JavaScript**: The core languages used to build this extension.
+- **Chrome Extensions API**: For managing browser tabs and interacting with Chrome.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
