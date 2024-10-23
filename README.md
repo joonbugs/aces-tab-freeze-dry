@@ -4,15 +4,15 @@
 A Chrome extension to efficiently manage and organize your browser tabs, helping you stay focused, reduce memory usage, and keep track of your open tabs.
 
 ## 📚 Table of Contents
-- [🔍 Overview](#overview)
-- [🎥 Demo Video](#demo-video)
-- [⚙️ Installation](#installation)
-- [🧩 What is a Chrome Extension?](#what-is-a-chrome-extension)
-- [✨ Key Features](#key-features)
-- [📁 File Structure](#file-structure)
-- [🤝 Contributing](#contributing)
-- [🛠️ Tech Stack](#tech-stack)
-- [📄 License](#license)
+- [🔍 Overview](#-overview)
+- [🎥 Demo Video](#-demo-video)
+- [⚙️ Installation](#-installation)
+- [🧩 What is a Chrome Extension?](#-what-is-a-chrome-extension)
+- [✨ Key Features](#-key-features)
+- [📁 File Structure](#-file-structure)
+- [🤝 Contributing](#-contributing)
+- [🛠️ Tech Stack](#-tech-stack)
+- [📄 License](#-license)
 
 ## 🔍 Overview
 Managing too many open tabs can quickly become overwhelming, slowing down your browser and making it difficult to stay organized. **Tab Manager Extension** helps you group, mute, sleep, and restore tabs, ensuring you never lose track of your work.
