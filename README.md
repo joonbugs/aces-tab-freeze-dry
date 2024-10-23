@@ -1,32 +1,34 @@
 ![HTML Badge](https://img.shields.io/badge/HTML-5-orange) ![CSS Badge](https://img.shields.io/badge/CSS-3-blue) ![JavaScript Badge](https://img.shields.io/badge/JavaScript-ES6-yellow) ![Open Source Love Badge](https://badges.frapsoft.com/os/v1/open-source.svg?v=103) ![MIT License Badge](https://img.shields.io/badge/license-MIT-green)
-# Tab Manager Chrome Extension
+
+# 🗂️ Tab Manager Chrome Extension
 A Chrome extension to efficiently manage and organize your browser tabs, helping you stay focused, reduce memory usage, and keep track of your open tabs.
 
-## Table of Contents
-- [Overview](#overview)
-- [Demo Video](#demo-video)
-- [Installation](#installation)
-- [What is a Chrome Extension?](#what-is-a-chrome-extension)
-- [Key Features](#key-features)
-- [File Structure](#file-structure)
-- [Contributing](#contributing)
-- [Tech Stack](#tech-stack)
-- [License](#license)
+## 📚 Table of Contents
+- [🔍 Overview](#overview)
+- [🎥 Demo Video](#demo-video)
+- [⚙️ Installation](#installation)
+- [🧩 What is a Chrome Extension?](#what-is-a-chrome-extension)
+- [✨ Key Features](#key-features)
+- [📁 File Structure](#file-structure)
+- [🤝 Contributing](#contributing)
+- [🛠️ Tech Stack](#tech-stack)
+- [📄 License](#license)
 
-## Overview
+## 🔍 Overview
 Managing too many open tabs can quickly become overwhelming, slowing down your browser and making it difficult to stay organized. **Tab Manager Extension** helps you group, mute, sleep, and restore tabs, ensuring you never lose track of your work.
 
-## Demo Video
+## 🎥 Demo Video
+Watch this demo to see how the Tab Manager Extension works and how you can use it to enhance your browsing experience:
 [Link to the demo video here](https://drive.google.com/file/d/1bEkgMOSpTxdjp2_MOajCE4XS1l_BZrmO/view?usp=drive_link)
 
-## Installation
+## ⚙️ Installation
 To install the extension locally for development or personal use:
 1. Download the extension files.
-2. Go to [Chrome Extensions](chrome://extensions/).
+2. Go to Chrome Extensions (chrome://extensions/).
 3. Enable **Developer mode** (toggle in the upper right corner).
 4. Click **Load unpacked** and select the extension folder.
 
-## What is a Chrome Extension?
+## 🧩 What is a Chrome Extension?
 Chrome extensions are small software programs that customize the browsing experience. They enable users to tailor Chrome's functionality and behavior to their individual needs or preferences. Extensions can modify the user interface, enhance web pages, or add new features.
 
 ### Major Parts of a Chrome Extension
@@ -38,7 +40,7 @@ Chrome extensions are small software programs that customize the browsing experi
 
 - **Manifest File**: A JSON file that contains metadata about the extension, including its name, version, permissions, and other settings. The manifest file is essential for defining how the extension interacts with the browser.
 
-## Key Features
+## ✨ Key Features
 The Extension is divided into four main tabs:
 
 <img align="right" height="350" src="media/readme-feature-section-gif.gif" alt="Key Features GIF">
@@ -50,7 +52,7 @@ The Extension is divided into four main tabs:
 
 > **Note:** The **Sessions** tab is not developed yet and currently not shown in the popup UI.
 
-## File Structure
+## 📁 File Structure
 ```
 TabManagerExtension/
 ├── popup.html              # Main HTML file for the popup interface
@@ -64,7 +66,7 @@ TabManagerExtension/
 └── icons/                  # Folder for extension icons
 ```
 
-## Contributing
+## 🤝 Contributing
 
 We welcome contributions! Here's how you can get started:
 
@@ -94,10 +96,10 @@ We welcome contributions! Here's how you can get started:
 ### Issues and Feature Requests
 Feel free to report any issues or feature requests via the [issues page](https://github.com/MaryEhb/tab-manager-chrome-extension/issues).
 
-## Tech Stack
+## 🛠️ Tech Stack
 - **HTML/CSS/JavaScript**: The core languages used to build this extension.
 - **Chrome Extensions API**: For managing browser tabs and interacting with Chrome.
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
