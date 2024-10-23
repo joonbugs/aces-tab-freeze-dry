@@ -10,12 +10,22 @@ let GroupingFunctioning = false;
 let allowManualGroupAccess = false;
 
 // Listen for when the extension is installed and open a welcome tab 
-chrome.runtime.onInstalled.addListener(({ reason }) => {
+chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason === 'install') {
     chrome.tabs.create({
       url: 'https://github.com/MaryEhb/tab-manager-chrome-extension'
     });
   }
+
+  try {
+    await getVaribales();
+    // await loadLazyLoadingSettings(); // Load lazy loading settings first
+    await migratePinnedGroups(); // Migrate pinned groups
+    tabLooping();
+  } catch (error) {
+    console.error('Error during startup migration:', error);
+  }
+  
 });
 
 // On startup, migrate pinned groups from storage to open them
