@@ -40,7 +40,7 @@ Chrome extensions are small software programs that customize the browsing experi
 
 ## Key Features
 The Extension is divided into four main tabs:
-<img align="right" src="https://drive.google.com/uc?export=view&id=1bEkgMOSpTxdjp2_MOajCE4XS1l_BZrmO">
+<img align="right" width="300" height="450" src="https://drive.google.com/uc?id=1bEkgMOSpTxdjp2_MOajCE4XS1l_BZrmO">
 
 - **Open Tabs**: Displays all your open tabs, organized into pinned, ungrouped, and grouped categories. Users can click to access tabs, view the last visited time, and control options like sleep, mute, or close.
 - **Auto Group**: Automatically groups tabs based on user-defined URL patterns, making it easier to manage multiple tabs.
