@@ -90,7 +90,7 @@ We welcome contributions! Here's how you can get started:
 6. Open a pull request and describe what you've changed.
 
 ### Setting Up for Development
-- Load the extension as described in the [Installation](#installation) section.
+- Load the extension as described in the [Installation](#-installation) section.
 - Since the project is focused on pure HTML, CSS, and JavaScript, no build steps are required, keeping it simple for beginners.
 
 ### Issues and Feature Requests
