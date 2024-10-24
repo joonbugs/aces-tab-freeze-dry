@@ -68,8 +68,9 @@ TabManagerExtension/
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how you can get started:
+We welcome contributions! Please check out the [CONTRIBUTING.md](CONTRIBUTING.md) file for detailed guidelines on how to contribute to this project, including how to report bugs, request features, and submit your first code contribution.
 
+### Quick Start
 1. **Fork** this repository.
 2. **Clone** the forked repository to your local machine:
     ```bash
