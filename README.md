@@ -6,12 +6,12 @@ A Chrome extension to efficiently manage and organize your browser tabs, helping
 ## 📚 Table of Contents
 - [🔍 Overview](#-overview)
 - [🎥 Demo Video](#-demo-video)
-- [⚙️ Installation](#-installation)
+- [⚙️ Installation](#%EF%B8%8F-installation)
 - [🧩 What is a Chrome Extension?](#-what-is-a-chrome-extension)
 - [✨ Key Features](#-key-features)
 - [📁 File Structure](#-file-structure)
 - [🤝 Contributing](#-contributing)
-- [🛠️ Tech Stack](#-tech-stack)
+- [🛠️ Tech Stack](#%EF%B8%8F-tech-stack)
 - [📄 License](#-license)
 
 ## 🔍 Overview
@@ -91,7 +91,7 @@ We welcome contributions! Please check out the [CONTRIBUTING.md](CONTRIBUTING.md
 6. Open a pull request and describe what you've changed.
 
 ### Setting Up for Development
-- Load the extension as described in the [Installation](#-installation) section.
+- Load the extension as described in the [Installation](#%EF%B8%8F-installation) section.
 - Since the project is focused on pure HTML, CSS, and JavaScript, no build steps are required, keeping it simple for beginners.
 
 ### Issues and Feature Requests
