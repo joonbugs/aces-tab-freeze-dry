@@ -12,9 +12,6 @@
     "host_permissions": [
         "*://*/*"
     ],
-    "optional_permissions": [
-        "downloads"
-    ],
     "background": {
         "service_worker": "background.js"
     },
