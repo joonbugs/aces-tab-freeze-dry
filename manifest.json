@@ -8,8 +8,6 @@
         "storage",
         "sessions",
         "activeTab",
-        "alarms",
-        "notifications",
         "tabGroups"
     ],
     "host_permissions": [
