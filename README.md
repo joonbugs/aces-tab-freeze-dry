@@ -100,6 +100,7 @@ Feel free to report any issues or feature requests via the [issues page](https:/
 ## 🛠️ Tech Stack
 - **HTML/CSS/JavaScript**: The core languages used to build this extension.
 - **Chrome Extensions API**: For managing browser tabs and interacting with Chrome.
+- **Icons**: Sourced from [Flaticon](https://www.flaticon.com/).
 
 ## 📄 License
 
