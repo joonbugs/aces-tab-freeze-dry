@@ -1,3 +1,33 @@
+/*
+    Filename: openTabs.js
+    Purpose: This script manages the display and organization of open tabs within the Tab Manager Chrome extension. 
+    It retrieves the current tabs from the Chrome browser, categorizes them into pinned, ungrouped, and grouped tabs,
+    and dynamically renders them in the extension popup.
+
+    Key Functions:
+    - displayTabs: Fetches all tabs in the current window and categorizes them into pinned, ungrouped, and grouped tabs. 
+      It then calls the renderTabs function to display each category in the popup.
+    - renderTabs: Takes a list of tabs, creates a visual representation for them, and manages user interactions, 
+      such as expanding/collapsing groups and closing or pinning tabs. This function also handles the creation of 
+      group buttons for managing grouped tabs.
+
+    Dependencies:
+    - Uses Chrome API methods (chrome.tabs.query, chrome.storage.local.get, chrome.tabGroups.get, and chrome.tabGroups.update) 
+      to interact with the browser's tab and group data.
+
+    Storage Variables:
+    - Pinned Groups: Accessed from `chrome.storage.local` to manage pinned tab groups.
+
+    Element IDs:
+    - 'openTabsContent': The main container in the popup where all open tabs are rendered.
+    - 'pinned-tabs-container': Container for displaying pinned tabs.
+    - 'ungrouped-tabs-container': Container for displaying ungrouped tabs.
+    - 'grouped-tabs-container': Container for displaying grouped tabs.
+
+    Initialization:
+    - The function is invoked within the displayTabs() function, which runs upon loading the popup to show the current state 
+      of open tabs.
+*/
 
 // Function to display all open chrome tabs in popup openTabsContent
 function displayTabs() {

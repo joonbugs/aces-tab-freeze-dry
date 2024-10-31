@@ -1,3 +1,40 @@
+/*
+    Filename: background.js
+    Purpose: This script serves as the backbone of the Tab Manager Chrome extension, managing tab behavior and global settings.
+    It handles functionalities like auto-closing tabs, lazy loading, auto-sleeping, and grouping tabs, ensuring a smooth user experience.
+
+    Key Functions:
+    - tabLooping: This is the main function that continuously monitors the state of open tabs and manages various tab functionalities. It tracks access times for tabs, handles tab closure based on user-defined settings, and ensures that resources are optimally utilized.
+    - migratePinnedGroups: On installation or startup, this function retrieves any previously saved pinned tab groups from storage, creates corresponding groups in Chrome, and manages their updates.
+    - getVaribales: Fetches the current settings and states for features like auto-close, lazy loading, and grouping from Chrome's local storage.
+    - updatePinnedGroupsStorage: Updates the local storage with the current state of pinned groups, ensuring that the extension maintains accurate information about tab groups.
+
+    Storage Variables:
+    - autoCloseEnabled: A boolean flag indicating whether the auto-close feature is enabled.
+    - autoCloseTime: An object representing the time interval for auto-closing tabs, with `minutes` and `seconds`.
+    - lazyLoadingEnabled: A boolean flag indicating whether lazy loading is active, allowing tabs to load only when needed.
+    - autoSleepEnabled: A boolean flag for the auto-sleep functionality, which temporarily suspends tabs after a defined time.
+    - autoSleepTime: An object defining the time interval after which tabs will be set to sleep.
+    - autoGroupingEnabled: A boolean flag to manage the auto-grouping of tabs.
+    - autoGroups: An array storing details of auto-created tab groups.
+    - allowManualGroupAccess: A boolean flag that determines whether users can access manually created groups.
+
+    Event Listeners:
+    - chrome.runtime.onInstalled: Listens for the installation of the extension and opens a welcome tab.
+    - chrome.runtime.onStartup: Activates when the browser starts up, ensuring all previous settings and groups are loaded.
+    - chrome.storage.onChanged: Monitors changes to storage variables and updates the global variables accordingly.
+
+    Element IDs:
+    - None specified directly in this file, but various Chrome API calls are used to interact with tab groups and individual tabs.
+
+    Initialization:
+    - The script initializes by loading variables from storage and setting up the tab management loop. The `tabLooping` function is called to start monitoring and managing tab states.
+    
+    Important Notes:
+    - The `tabLooping` function should be carefully managed to avoid performance issues, as it runs continuously to monitor tabs.
+    - Ensure to handle errors gracefully, especially in asynchronous functions, to maintain a robust user experience.
+*/
+
 // Global variables
 let autoCloseEnabled = false; // Variable to manage auto close state
 let autoCloseTime = { minutes: 120, seconds: 0 }; // Default time

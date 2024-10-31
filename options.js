@@ -1,3 +1,50 @@
+/*
+    Filename: options.js
+    Purpose: This script is responsible for loading and managing user settings within the Options page of the Tab Manager Chrome extension. 
+    It interacts with the Chrome storage API to retrieve and save options related to auto-close, auto-sleep, lazy loading, 
+    and manual group access settings. 
+
+    Key Functions:
+    - loadOptions: Initializes the options page by loading user preferences from Chrome storage and updating the UI accordingly.
+    - handleCheckboxChange: Toggles the auto-close feature and saves its state to storage, resetting time settings if disabled.
+    - toggleTimeSettings: Shows or hides the time settings input fields based on the state of the auto-close checkbox.
+    - toggleEdit: Manages the visibility of edit and submit buttons for time settings, enabling or disabling inputs accordingly.
+    - setInputsDisabled: Disables or enables time input fields based on the editing state.
+    - saveTimeSettings: Validates and saves the auto-close time settings to storage, ensuring values are greater than zero.
+    - handleSleepCheckboxChange: Toggles the auto-sleep feature and saves its state to storage, showing or hiding sleep time settings.
+    - toggleSleepTimeSettings: Manages the display of sleep time settings based on the auto-sleep checkbox state.
+    - toggleSleepEdit: Similar to toggleEdit, but for sleep time settings, managing button visibility and input states.
+    - setSleepInputsDisabled: Disables or enables sleep time input fields based on the editing state.
+    - saveSleepTimeSettings: Validates and saves the auto-sleep time settings to storage, ensuring values are greater than zero.
+    - handleLazyLoadChange: Saves the lazy loading preference to storage when the checkbox state changes.
+    - handleManualGroupAccessChange: Saves the preference for manual group access to storage and logs the change.
+
+    Dependencies:
+    - Utilizes Chrome storage API methods (chrome.storage.local.get and chrome.storage.local.set) for persisting user settings.
+    - Assumes the existence of specific HTML elements with IDs that correspond to the settings being manipulated (e.g., 'autoCloseCheckbox', 'autoCloseMinutes').
+
+    Storage Variables:
+    - autoCloseEnabled
+    - autoCloseTime
+    - autoSleepEnabled
+    - autoSleepTime
+    - lazyLoadingEnabled
+    - allowManualGroupAccess
+
+    HTML Element IDs:
+    - autoCloseCheckbox
+    - autoCloseMinutes
+    - autoCloseSeconds
+    - autoSleepCheckbox
+    - autoSleepMinutes
+    - autoSleepSeconds
+    - lazyLoadingCheckbox
+    - allowManualGroupAccessCheckbox
+
+    Initialization:
+    - The loadOptions function is called when the options tab is loaded, setting up the UI based on saved preferences and adding event listeners for user interactions.
+*/
+
 function loadOptions() {
     console.log('Options Loaded');
 

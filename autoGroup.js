@@ -1,3 +1,49 @@
+/*
+    Filename: options.js
+    Purpose: This script manages the automatic grouping feature in the Tab Manager Chrome extension. It allows users to create and manage tab groups based on specified patterns and enables or disables the auto-grouping functionality through a user-friendly interface.
+
+    Key Functions:
+    - autoGroup: Initializes the auto-grouping feature, loads saved settings, and manages the user interface for adding and deleting tab groups.
+    - loadSavedGroups: Displays the user's saved tab groups in the UI, allowing for easy management.
+    - deleteGroup: Removes a tab group from storage and ungroups any associated tabs in the Chrome browser.
+    - updatePatternList: Updates the displayed list of patterns for the current group.
+    - clearForm: Resets the input fields and selected colors in the form used for creating new groups.
+    - extractDomain: Extracts the domain (excluding subdomains) from a given URL.
+    - extractSubdomain: Extracts the full hostname (including subdomains) from a given URL.
+
+    Event Listeners:
+    - Checkbox for enabling/disabling auto-grouping.
+    - Button for adding a new pattern.
+    - Button for saving a new group.
+    - Button for clearing the form.
+    - Buttons for retrieving the domain, subdomain, and exact URL of the active tab.
+
+    Dependencies:
+    - Utilizes Chrome storage API methods (chrome.storage.local.get and chrome.storage.local.set) for persisting user settings.
+    - Assumes the existence of specific HTML elements with IDs that correspond to the settings being manipulated (e.g., 'activateAutoGroupingCheckbox', 'formContainer').
+
+    Storage Variables:
+    - autoGroupingEnabled
+    - tabGroups
+
+    HTML Element IDs:
+    - activateAutoGroupingCheckbox
+    - formContainer
+    - saveGroupBtn
+    - addPatternBtn
+    - clearFormBtn
+    - groupPattern
+    - patternList
+    - groupName
+    - savedGroupsList
+    - getDomainBtn
+    - getSubdomainBtn
+    - getExactUrlBtn
+
+    Initialization:
+    - The autoGroup function is called to set up the auto-grouping interface, loading saved settings and establishing event listeners for user interactions.
+*/
+
 const autoGroup = async () => {
   const autoGroupCheckbox = document.getElementById('activateAutoGroupingCheckbox');
   const formContainer = document.getElementById('formContainer');

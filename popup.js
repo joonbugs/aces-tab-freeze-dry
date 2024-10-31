@@ -1,3 +1,23 @@
+/*
+    Filename: popup.js
+    Purpose: This script handles navigation and UI behavior for the Tab Manager Chrome extension popup. It initializes
+    event listeners on navigation tabs, controls active content display based on tab selection, and sets up a basic dark 
+    mode detection (styles for dark mode are not created yet)
+
+    Key Functions:
+    - deactivateAll: Deactivates all tabs and hides their associated content to ensure only one section is displayed at a time.
+    - Dark Mode Check: Detects the user's system dark mode preference and applies a 'dark-mode' class to the body if enabled.
+      Note: No dark mode styles are currently implemented, providing flexibility for future contributors to add styling.
+    - Tab Navigation Event Listeners: Adds click events to each tab, activating the appropriate content section and 
+      triggering specific functions from related scripts (e.g., displayTabs, autoGroup, loadSessions, loadOptions).
+
+    Dependencies:
+    - Functions defined in openTabs.js, autoGroup.js, sessions.js, and options.js for handling tab-specific functionality.
+
+    Initialization:
+    - The 'Open Tabs' content is displayed by default on load via an initial call to displayTabs().
+*/
+
 document.addEventListener('DOMContentLoaded', () => {
     const popupNavTabs = document.querySelectorAll('.nav-tab');
     const popupContents = document.querySelectorAll('.popup-content');

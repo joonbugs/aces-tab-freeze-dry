@@ -1,3 +1,21 @@
+<!-- 
+    Filename: popup.html
+    Purpose: Main HTML structure for the Tab Manager Chrome extension popup. This file defines the layout 
+    and UI for tab management features such as Open Tabs, Auto Group, and Options. The Sessions tab is 
+    currently commented out as it is under development.
+    
+    Sections:
+    - Metadata: Provides character encoding, responsive settings, and description for accessibility and SEO.
+    - Navigation: Includes navigation tabs (Open Tabs, Auto Group, Options) to access different 
+      sections of the extension.
+    - Popup Content: Contains content for each tab, with specific elements for managing tab groups 
+      (Auto Group) and extension options (Options).
+    
+    Dependencies:
+    - CSS: Links to popup.css for styling.
+    - JavaScript: Scripts for handling logic specific to each section (openTabs.js, autoGroup.js, etc.).
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -67,7 +85,7 @@
                 <input type="text" id="groupPattern">
                 <div class="buttonWrapper">
                     <div class="btns-container suggestions">
-                         <p>Suggestions:</p>
+                        <p>Suggestions:</p>
                         <button id="getDomainBtn">This Domain</button>
                         <button id="getSubdomainBtn">This Domain and Subdomain</button>
                         <button id="getExactUrlBtn">Get Exact URL</button>
@@ -149,7 +167,7 @@
                 <div class="option-description">
                     <p>If checked, auto grouping can access manually created groups but not pinned tabs or groups.</p>
                 </div>
-            </div>            
+            </div>
         </div>
 
     </div>
