@@ -35,6 +35,42 @@
     - Ensure to handle errors gracefully, especially in asynchronous functions, to maintain a robust user experience.
 */
 
+// Groq Variables
+const url = 'https://api.groq.com/openai/v1/chat/completions';
+const apiKey = '';
+
+// Function to get a response from the Groq API
+function getGroqResponse(inText) {
+    // Define the data to be sent to the Groq API
+    model = 'llama-3.3-70b-versatile';
+    messages = [{ role: 'user', content: inText }];
+    const data = { model, messages };
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(data)
+    })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Full response:', result);  // Debugging: Log the full response to understand its structure
+
+            // Ensure 'choices' exists and is an array before accessing it
+            if (result.choices && result.choices.length > 0) {
+                const responseText = result.choices[0].message.content;
+                console.log('Parsed response:', responseText);  // Debugging: Log the parsed response
+            } else {
+                console.error('No choices found in response:', result);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
 // Global variables
 let autoCloseEnabled = false; // Variable to manage auto close state
 let autoCloseTime = { minutes: 120, seconds: 0 }; // Default time
@@ -131,7 +167,8 @@ chrome.storage.onChanged.addListener(async (changes) => {
     allowManualGroupAccess = changes.allowManualGroupAccess.newValue;
   }
 
-  console.log('Variables Changed', autoCloseEnabled, autoCloseTime, lazyLoadingEnabled, autoSleepEnabled, autoSleepTime, autoGroupingEnabled, autoGroups, allowManualGroupAccess);
+    console.log('Variables Changed', autoCloseEnabled, autoCloseTime, lazyLoadingEnabled, autoSleepEnabled, autoSleepTime, autoGroupingEnabled, autoGroups, allowManualGroupAccess);
+    getGroqResponse('This is a test prompt, please reply with: passed');
 });
 
 /* End of listensers when global variables change in storage */
@@ -381,6 +418,18 @@ const matchesPattern = (url, patterns) => {
 
 let isGrouping = false; // Lock variable
 
+
+
+
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+
+
+
 const handleTabGrouping = async (tab) => {
   // Wait until the lock is released
   while (isGrouping) {
@@ -412,8 +461,17 @@ const handleTabGrouping = async (tab) => {
 
     let existingGroupId = null;
 
-    // Iterate through defined groups
-    for (const group of autoGroups) {
+      // Iterate through defined groups --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+      const groupData = [];
+      for (const group of groups) {
+          groupData.push(group.title);
+      }
+      console.log('Group Data is:', groupData);
+      getGroqResponse('Which of the following groups should I add this tab to? Your reply should be one string of data with no spaces, and must match the group name exactly', groupData);
+
+
+      for (const group of autoGroups) {
+
       if (matchesPattern(tab.url, group.patterns)) {
         console.log(`Tab ${tab.title} matches group: ${group.title}, id: ${group.id}, chrome id: ${group.idInChrome}`);
 
@@ -463,6 +521,19 @@ const handleTabGrouping = async (tab) => {
     isGrouping = false; // Release the lock
   }
 };
+
+
+
+
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+
+
+
 
 /**
  * Ungroup all groups in the autoGroups array
