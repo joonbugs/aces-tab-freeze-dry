@@ -40,36 +40,42 @@ const url = 'https://api.groq.com/openai/v1/chat/completions';
 const apiKey = '';
 
 // Function to get a response from the Groq API
-function getGroqResponse(inText) {
+async function getGroqResponse(inText) {
     // Define the data to be sent to the Groq API
-    model = 'llama-3.3-70b-versatile';
-    messages = [{ role: 'user', content: inText }];
+    const responseText = '';
+    const model = 'gemma2-9b-it';
+    const messages = [{ role: 'user', content: inText }];
     const data = { model, messages };
 
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(data)
-    })
-        .then(response => response.json())
-        .then(result => {
-            console.log('Full response:', result);  // Debugging: Log the full response to understand its structure
-
-            // Ensure 'choices' exists and is an array before accessing it
-            if (result.choices && result.choices.length > 0) {
-                const responseText = result.choices[0].message.content;
-                console.log('Parsed response:', responseText);  // Debugging: Log the parsed response
-            } else {
-                console.error('No choices found in response:', result);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(data)
         });
+
+        const result = await response.json();
+
+        //console.log('Full response:', result);  // Debugging: Log the full response to understand its structure
+
+        // Ensure 'choices' exists and is an array before accessing it
+        if (result.choices && result.choices.length > 0) {
+            const responseText = result.choices[0].message.content;
+            //console.log('Parsed response:', responseText);  // Debugging: Log the parsed response
+            return responseText;
+        } else {
+            console.error('No choices found in response:', result);
+            return null;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        return null;
+    }
 }
+
 
 // Global variables
 let autoCloseEnabled = false; // Variable to manage auto close state
@@ -168,7 +174,7 @@ chrome.storage.onChanged.addListener(async (changes) => {
   }
 
     console.log('Variables Changed', autoCloseEnabled, autoCloseTime, lazyLoadingEnabled, autoSleepEnabled, autoSleepTime, autoGroupingEnabled, autoGroups, allowManualGroupAccess);
-    getGroqResponse('This is a test prompt, please reply with: passed');
+
 });
 
 /* End of listensers when global variables change in storage */
@@ -403,7 +409,7 @@ const tabLooping = () => {
         GroupingFunctioning = false;
       }
     }
-  }, 1000);
+  }, 20000);
 }
 
 /* End Tab Looping */
@@ -458,16 +464,51 @@ const handleTabGrouping = async (tab) => {
     // Get existing tab groups from storage
     const result = await chrome.storage.local.get(['tabGroups']);
     const groups = result.tabGroups || [];
+      console.log('Groups:', groups);
 
-    let existingGroupId = null;
+      let existingGroupId = null;
+
+
+
+
+
+
+
+
 
       // Iterate through defined groups --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+      const tabTitle = tab.title;
       const groupData = [];
       for (const group of groups) {
           groupData.push(group.title);
       }
-      console.log('Group Data is:', groupData);
-      getGroqResponse('Which of the following groups should I add this tab to? Your reply should be one string of data with no spaces, and must match the group name exactly', groupData);
+      const prompt = "Which of the following groups should I add this tab: '" + tabTitle + "' to? Your reply should be one string of data with no spaces, and must match the group name exactly. The group data is: '" + groupData + "'. If no appropriate group can be approximated, reply with 'Misc'.";
+      const llmGroup = await getGroqResponse(prompt);
+
+      console.log('llmGroup: ', llmGroup);
+      console.log('tabGroups', result.tabGroups);
+
+      result.tabGroups.forEach(group => {
+          console.log(group.title, group.id);
+          if (group.title.toString === llmGroup.toString) {
+              console.log('Group ID: ', group.idInChrome);
+              chrome.tabs.group({ tabIds: [tab.id], groupId: parseInt(group.id, 10) });
+          }
+          //console.log(`Checking group title: "${group.title}" against llmGroup: "${llmGroup}"`);
+      });
+
+
+  
+
+      
+
+
+
+
+
+
+
+
 
 
       for (const group of autoGroups) {
@@ -553,7 +594,7 @@ const ungroupAutoGroups = async () => {
       for (const tab of tabsInGroup) {
         await new Promise((resolve) => {
           chrome.tabs.ungroup(tab.id, resolve); // Ungroup the tab
-        });
+       });
         console.log(`Ungrouped tab with ID: ${tab.id} from group ID: ${group.idInChrome}`);
       }
     }
