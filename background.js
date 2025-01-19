@@ -37,7 +37,7 @@
 
 // Groq Variables
 const url = 'https://api.groq.com/openai/v1/chat/completions';
-const apiKey = '';
+const apiKey = 'abcdefghijklmnopqrstuvwxyz';
 
 // Function to get a response from the Groq API
 async function getGroqResponse(inText) {
