@@ -37,7 +37,7 @@
 
 // Groq Variables
 const url = 'https://api.groq.com/openai/v1/chat/completions';
-const apiKey = 'abcdefghijklmnopqrstuvwxyz';
+const apiKey = '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';
 
 // Function to get a response from the Groq API
 async function getGroqResponse(inText) {
@@ -446,7 +446,7 @@ const handleTabGrouping = async (tab) => {
 
   try {
     // Check if the tab is in an auto group
-    const inAutoGroup =  (autoGroups.some(group => tab.groupId === group.idInChrome));
+    const inAutoGroup =  (autoGroups.some(group => tab.groupId === group.id));
 
     // Skip if the tab is already in a group and the allowManualGroupAccess is not enabled
     if (tab.groupId !== -1 && !inAutoGroup && !allowManualGroupAccess) {
@@ -490,9 +490,10 @@ const handleTabGrouping = async (tab) => {
 
       result.tabGroups.forEach(group => {
           console.log(group.title, group.id);
-          if (group.title.toString === llmGroup.toString) {
-              console.log('Group ID: ', group.idInChrome);
-              chrome.tabs.group({ tabIds: [tab.id], groupId: parseInt(group.id, 10) });
+          if (group.title === llmGroup) {
+              console.log('Group ID: ', group.id);
+              //chrome.tabs.group({ tabIds: [tab.id], groupId: parseInt(group.id, 10) });
+              chrome.tabs.group({ tabIds: [tab.id], groupId: Math.trunc(group.id) });
           }
           //console.log(`Checking group title: "${group.title}" against llmGroup: "${llmGroup}"`);
       });
@@ -514,19 +515,19 @@ const handleTabGrouping = async (tab) => {
       for (const group of autoGroups) {
 
       if (matchesPattern(tab.url, group.patterns)) {
-        console.log(`Tab ${tab.title} matches group: ${group.title}, id: ${group.id}, chrome id: ${group.idInChrome}`);
+        console.log(`Tab ${tab.title} matches group: ${group.title}, id: ${group.id}, chrome id: ${group.id}`);
 
         // Check if the group ID in Chrome is valid
         const existingGroups = await chrome.tabGroups.query({});
-        const isValidGroupId = group.idInChrome && existingGroups.some(existingGroup => existingGroup.id === group.idInChrome);
+        const isValidGroupId = group.id && existingGroups.some(existingGroup => existingGroup.id === group.id);
 
         if (isValidGroupId) {
           // If the group ID is valid, add the tab to that group
           try {
-            await chrome.tabs.group({ tabIds: [tab.id], groupId: group.idInChrome });
-            console.log(`Added tab ${tab.title} to existing group ${group.title} with chrome id: ${group.idInChrome}`);
+            await chrome.tabs.group({ tabIds: [tab.id], groupId: group.id });
+            console.log(`Added tab ${tab.title} to existing group ${group.title} with chrome id: ${group.id}`);
           } catch (error) {
-            console.error(`Error adding tab ${tab.title} to group ${group.idInChrome}:`, error);
+            console.error(`Error adding tab ${tab.title} to group ${group.id}:`, error);
           }
           return; // Release lock before returning
         } else {
@@ -546,7 +547,7 @@ const handleTabGrouping = async (tab) => {
         // Update storage with the new group ID
         const updatedGroups = groups.map(existingGroup => {
           if (existingGroup.id === existingGroupId) {
-            return { ...existingGroup, idInChrome: groupId }; // Update idInChrome
+            return { ...existingGroup, id: groupId }; // Update id
           }
           return existingGroup; // Return unchanged group
         });
@@ -584,24 +585,24 @@ const ungroupAutoGroups = async () => {
   try {
     // Iterate through each auto group
     for (const group of autoGroups) {
-      if (group.idInChrome === null) {
-        continue; // Skip if idInChrome is null
+      if (group.id === null) {
+        continue; // Skip if id is null
       }
       // Fetch all tabs in the current group
-      const tabsInGroup = await chrome.tabs.query({ groupId: group.idInChrome });
+      const tabsInGroup = await chrome.tabs.query({ groupId: group.id });
       
       // Ungroup each tab in the group
       for (const tab of tabsInGroup) {
         await new Promise((resolve) => {
           chrome.tabs.ungroup(tab.id, resolve); // Ungroup the tab
        });
-        console.log(`Ungrouped tab with ID: ${tab.id} from group ID: ${group.idInChrome}`);
+        console.log(`Ungrouped tab with ID: ${tab.id} from group ID: ${group.id}`);
       }
     }
 
-    // Update all autoGroups to set idInChrome to null
+    // Update all autoGroups to set id to null
     autoGroups.forEach(group => {
-      group.idInChrome = null; // Set idInChrome to null for each group
+      group.id = null; // Set id to null for each group
     });
 
     // Save the updated autoGroups back to storage
@@ -610,7 +611,7 @@ const ungroupAutoGroups = async () => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {
-          console.log('Updated idInChrome to null for all groups in storage');
+          console.log('Updated id to null for all groups in storage');
           resolve();
         }
       });
