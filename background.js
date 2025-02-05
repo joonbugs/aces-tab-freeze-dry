@@ -358,7 +358,7 @@ const migratePinnedGroups = async () => {
                   chrome.tabGroups.get(tab.groupId).then((inGroup) => { //TODO resolve the async issue here (eg async chrome.tabGroups.get(tab.groupId))
                       newGroupTitle = inGroup.title;
                       console.log(inGroup); // TODO console checks indicate that inGroup.id is the idInChrome needed
-                      const inText = `You are not interacting with a human user and are instead acting as a piece software. Your job is to ensure that, when a tab's url changes, the tab group the tab is in still fits. For example, you may receive a title such as 'The Food Network' for tabs that belong in food related groups, or 'spotify' for tabs that belong in music related groups. The following text is related to your input data. The title of the tab has changed to: ${title}. Currently, this tab is in the current group: ${newGroupTitle}. Is this group a good fit? Return only the word true or false. Do not add any text formatting of any kind`;
+                      const inText = `You are not interacting with a human user and are instead acting as a piece software. Your job is to ensure that, when a tab's url changes, the tab group the tab is in still fits. For example, you may receive a title such as 'The Food Network' for tabs that belong in food related groups, or 'spotify' for tabs that belong in music related groups. The following text is related to your input data. The title of the tab has changed to:[ ${title} ]. Currently, this tab is in the current group: [ ${newGroupTitle} ]. Is this group a good fit? Return only the word true or false. Do not add any text formatting of any kind`;
                       console.log(inText);
 
                       getGroqResponse(inText).then((groupCheck) => {
@@ -367,24 +367,23 @@ const migratePinnedGroups = async () => {
                               console.log('Group refit detected!!');
 
                               
-
+                              
                               //llmGroup = getGroup(tab);
-                              getGroup(tab).then((llmGroup) => {
-                                  console.log(llmGroup);
-                                  console.log('LLM Group: ', llmGroup);
-                                  llmGroupId = autoGroups.find(group => group.title === llmGroup);
+                              getGroup(tab).then((llmGroupTitle) => {
+                                  if (llmGroupTitle.endsWith(' \n')) {  //ends with n TODO 
+                                        llmGroupTitle = llmGroupTitle.slice(0,-3) //remove last three chars
+                                  }
+                                  console.log(llmGroupTitle);
+                                  console.log('LLM Group: ', llmGroupTitle);
+                                  llmGroup = autoGroups.find(group => group.title === llmGroupTitle);
+                                  llmGroupId = llmGroup.idInChrome;
                                   assignGroup(tab, llmGroupId);
                                   console.log('inGroup is defined as: ', inGroup);
                               }).catch(error => {
                                   console.error('Error: ', error);
-                              });
+                              });                              
                               
-                              
-                              console.log(inGroup);
-                              
-
- 
-
+                              console.log(inGroup);                             
                               // TODO make group assignment a method with tab and group as inputs
                           }
                       });
@@ -556,7 +555,7 @@ const tabLooping = () => {
         GroupingFunctioning = false;
       }
     }
-  }, 2000000);
+  }, 20000);
 };
 
 /* End Tab Looping */
@@ -833,10 +832,10 @@ async function getGroup(tab) {
 
 function assignGroup(tab, llmGroupId) {
     chrome.tabs.group({
-        tabIds: [tab.id],
+        tabIds: tab.id,
         groupId: llmGroupId,
     }).then();
-    console.log('Added tab ${tab.title} to existing group with chrome id: ${llmGroupId}');
+    console.log('Added tab ' + tab.title +' to existing group with chrome id: ' + llmGroupId);
 }
 
 
