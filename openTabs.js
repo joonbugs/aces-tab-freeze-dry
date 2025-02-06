@@ -67,7 +67,6 @@ function displayTabs() {
       groupedTabs.keys().forEach((groupId) => {
         // put move up button here?
         chrome.tabGroups.get(groupId, (group) => {
-          console.log('hello');
           const newMap = renderTabs(
             groupedTabs.get(groupId),
             `${group.title}`,
