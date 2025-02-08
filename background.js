@@ -45,7 +45,10 @@
 
 // Groq Variables
 const url = 'https://api.groq.com/openai/v1/chat/completions';
-const apiKey = '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';
+const ollamaUrl = 'http://localhost:11434/api/chat'
+const groqapikey = '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';
+const openAIapikey = '';
+const model = 0; // 0 = groq, 1 = openAI, 2 = Ollama
 
 // Global variables
 let autoCloseEnabled = false; // Variable to manage auto close state
@@ -60,6 +63,7 @@ let allowManualGroupAccess = false;
 let isGrouping = false; // Lock variable
 const tabAccessTimes = {};
 
+
 // timing variables
 let groqLastCalled = 0;
 const groqCallDelay = 50;
@@ -71,6 +75,59 @@ const groqCallDelay = 50;
 //////                                       //////////////////////////
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
+
+async function getLlmResponse(inText) {
+    if (model == 0) {
+        return getGroqResponse(inText);
+    }
+    else if (model == 1) {
+        return getOpenAiResponse(inText);
+    }
+    else if (model == 2) {
+        return getOllamaResponse(inText);
+    }
+
+
+}
+
+async function getOllamaResponse(inText) {
+    const responseText = '';
+    const model = 'gemma2-9b-it';
+    const messages = [{ role: 'user', content: inText }];
+    const data = { model, messages };
+
+    try {
+       const response = await fetch(ollamaUrl, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+             model: model,
+             messages: messages,
+             stream: false,
+          }),
+        });
+
+        const result = await response.json();
+
+        console.log('Full response:', result);
+
+        // Ensure 'choices' exists and is an array before accessing it
+        if (result.choices && result.choices.length > 0) {
+          const responseText = result.choices[0].message.content;
+          //console.log('Parsed response:', responseText);  // Debugging: Log the parsed response
+          return responseText;
+        } else {
+          console.error('No choices found in response:', result);
+          return null;
+        }
+    } catch (error) {
+        console.error('Error',error);
+        return null;
+    } 
+}
+
 
 // Function to get a response from the Groq API
 async function getGroqResponse(inText) {
@@ -86,7 +143,7 @@ async function getGroqResponse(inText) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${groqapikey}`,
       },
       body: JSON.stringify(data),
     });
@@ -109,6 +166,53 @@ async function getGroqResponse(inText) {
     return null;
   }
 }
+/*
+async function getOpenAIResponse(inText) {
+    // Ensure your API key is defined (e.g., process.env.OPENAI_API_KEY)
+    const url = 'https://api.openai.com/v1/chat/completions';
+
+    // Define the payload in the same structure as the cURL command
+    const payload = {
+        model: 'gpt-4o',
+        messages: [
+            {
+                role: 'developer',
+                content: 'You are a helpful assistant.',
+            },
+            {
+                role: 'user',
+                content: inText,
+            },
+        ],
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer ${openAIapikey}',
+      },
+    body: JSON.stringify(payload),
+    });
+
+const result = await response.json();
+console.log('Full response:', result);
+
+// Check if choices exist and extract the response from the assistant here
+if (result.choices && result.choices.length > 0) {
+    const responseText = result.choices[0].message.content;
+    return responseText;
+} else {
+    console.error('No choices found in the response:', result);
+    return null;
+}
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
+}
+}
+*/
 
 /** getAutoGroupRec()
 // given a tab, will query an LLM to find best fit from existing autogroups
@@ -133,7 +237,7 @@ async function getAutoGroupRec(tab) {
     "' to? Your reply should be one string of data with no spaces, and must match the group name exactly. The group data is: '" +
     groupData +
     "'. If no appropriate group can be approximated, reply with 'Misc'. Otherwise, reply with only the selected group name exactly as it appears. Do not add in any formatting of any kind";
-  recAutoGroupTitle = await getGroqResponse(prompt);
+  recAutoGroupTitle = await getLlmResponse(prompt);
 
   return recAutoGroupTitle;
 }
@@ -305,22 +409,29 @@ const isPinnedGroup = async (groupId) => {
 const syncChromeAutoGroups = async () => {
   console.log('syncChromeAutoGroups');
   chrome.tabGroups.query({}).then((existingChromeGroups) => {
-    // check if copies already exist
-    chrome.storage.local.get(['tabGroups'], (result) => {
-      const currAutoGroups = Object.values(result.tabGroups);
-      console.log(currAutoGroups);
-      console.log(typeof currAutoGroups);
-
+      // check if copies already exist
+      let nullResults = false;
+      chrome.storage.local.get(['tabGroups'], (result) => {
+          if (result.tabGroups != null) {
+              const currAutoGroups = Object.values(result.tabGroups);
+              console.log(currAutoGroups);
+              console.log(typeof currAutoGroups);
+              nullResults = true;
+          }      
       // loop through existing chrome tab groups
       for (chromeGroup of existingChromeGroups) {
         idInChrome = chromeGroup.id;
 
-        // see if chrome tab group id matches existing autogroup
-        matchingAutoGroup = currAutoGroups.find(
-          (g) => g.idInChrome === idInChrome
-        );
-        console.log('foobar');
-        console.log(matchingAutoGroup);
+          // see if chrome tab group id matches existing autogroup
+          matchingAutoGroup = null;
+          if (nullResults == false) {
+            matchingAutoGroup = currAutoGroups.find(
+                      (g) => g.idInChrome === idInChrome
+                    );
+                    console.log('foobar');
+                    console.log(matchingAutoGroup);
+          }
+        
         if (matchingAutoGroup == null) {
           console.log(
             'syncChromeAutoGroups -- creating matching autogroup: ',
@@ -348,7 +459,7 @@ const tabLooping = () => {
     const tabs = await new Promise((resolve) => chrome.tabs.query({}, resolve));
     const now = Date.now();
 
-    for (const tab of tabs) {
+      for (const tab of tabs) {
       // auto close functionality
       if (autoCloseEnabled) {
         // Update lastAccessed if the tab is active
@@ -818,7 +929,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         const inText = `You are not interacting with a human user and are instead acting as a piece software. Your job is to ensure that, when a tab's url changes, the tab group the tab is in still fits. For example, you may receive a title such as 'The Food Network' for tabs that belong in food related groups, or 'spotify' for tabs that belong in music related groups. The following text is related to your input data. The title of the tab has changed to:[ ${title} ]. Currently, this tab is in the current group: [ ${newGroupTitle} ]. Is this group a good fit? Return only the word true or false. Do not add any text formatting of any kind`;
         console.log(inText);
 
-        getGroqResponse(inText).then((groupCheck) => {
+        getLlmResponse(inText).then((groupCheck) => {
           console.log('groq called');
           if (groupCheck.endsWith(' \n')) {
             console.log('groupCheck trimmed');
