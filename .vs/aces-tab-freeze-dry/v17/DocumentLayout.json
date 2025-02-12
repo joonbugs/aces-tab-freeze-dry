@@ -26,15 +26,15 @@
           "Children": [
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
-            },
-            {
-              "$type": "Bookmark",
               "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
             },
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
               "$type": "Document",
@@ -46,8 +46,7 @@
               "RelativeToolTip": "autoGroup.js",
               "ViewState": "AgIAAGAAAAAAAAAAAAAgwGgAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-01-22T20:52:18.142Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-22T20:52:18.142Z"
             },
             {
               "$type": "Document",
@@ -57,7 +56,7 @@
               "RelativeDocumentMoniker": "background.js",
               "ToolTip": "C:\\Users\\david\\aces-tab-freeze-dry\\background.js",
               "RelativeToolTip": "background.js",
-              "ViewState": "AgIAANIAAAAAAAAAAAAgwKEBAAA3AAAAAAAAAA==",
+              "ViewState": "AgIAANgDAAAAAAAAAADwv9ACAABJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-01-22T20:07:51.971Z",
               "EditorCaption": ""
@@ -72,8 +71,7 @@
               "RelativeToolTip": "content.js",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-01-22T20:07:50.148Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-22T20:07:50.148Z"
             },
             {
               "$type": "Bookmark",

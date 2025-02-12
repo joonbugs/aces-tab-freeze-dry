@@ -91,41 +91,61 @@ async function getLlmResponse(inText) {
 }
 
 async function getOllamaResponse(inText) {
-    const responseText = '';
-    const model = 'gemma2-9b-it';
-    const messages = [{ role: 'user', content: inText }];
-    const data = { model, messages };
+    console.log('getOllamaResponse inText: ' + inText);
+    // Define the data to be sent to the Ollama API
+    const data = {
+        model: "gemma2:2b",  // Replace with the actual model name if needed
+        messages: [
+            {
+                role: "user",
+                content: inText
+            }
+        ],
+        stream: false
+    };
+
+    console.log('Data being sent to API:', JSON.stringify(data));
 
     try {
-       const response = await fetch(ollamaUrl, {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-             model: model,
-             messages: messages,
-             stream: false,
-          }),
+        const response = await fetch('http://localhost:11434/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
         });
 
+        console.log('Full response:', response); // Debugging: Log the full response to understand its structure
         const result = await response.json();
 
-        console.log('Full response:', result);
+        // Combine all message content from the response if there are multiple parts
+        let responseText = '';
+        if (Array.isArray(result)) {
+            result.forEach(part => {
+                if (part.message && part.message.content) {
+                    responseText += part.message.content + ' ';
+                }
+            });
+        } else if (result.message && result.message.content) {
+            responseText = result.message.content;
+        }
+
+        // Trim any extra spaces at the ends of the combined message
+        responseText = responseText.trim();
 
         // Ensure 'choices' exists and is an array before accessing it
-        if (result.choices && result.choices.length > 0) {
-          const responseText = result.choices[0].message.content;
-          //console.log('Parsed response:', responseText);  // Debugging: Log the parsed response
-          return responseText;
+        if (result.message.content && result.message.content.length > 0) {
+            responseText = result.message.content;
         } else {
-          console.error('No choices found in response:', result);
-          return null;
+            console.error('No choices found in response:', result);
+            return null;
         }
+
+        return responseText;
     } catch (error) {
-        console.error('Error',error);
+        console.error('Error:', error);
         return null;
-    } 
+    }
 }
 
 
@@ -407,42 +427,44 @@ const isPinnedGroup = async (groupId) => {
  * Scans Chrome Tab groups and creates corresponding autoGroup if ones does not exist
  */
 const syncChromeAutoGroups = async () => {
-  console.log('syncChromeAutoGroups');
-  chrome.tabGroups.query({}).then((existingChromeGroups) => {
-      // check if copies already exist
-      let nullResults = false;
-      chrome.storage.local.get(['tabGroups'], (result) => {
-          if (result.tabGroups != null) {
-              const currAutoGroups = Object.values(result.tabGroups);
-              console.log(currAutoGroups);
-              console.log(typeof currAutoGroups);
-              nullResults = true;
-          }      
-      // loop through existing chrome tab groups
-      for (chromeGroup of existingChromeGroups) {
-        idInChrome = chromeGroup.id;
+    console.log('syncChromeAutoGroups');
+    chrome.tabGroups.query({}).then((existingChromeGroups) => {
+        // check if copies already exist
+        let nullResults = true;
+        let currAutoGroups = [];
+        chrome.storage.local.get(['tabGroups'], (result) => {
+            if (result.tabGroups != null) {
+                console.log(result.tabGroups);
+                currAutoGroups = Object.values(result.tabGroups);
+                console.log(currAutoGroups);
+                console.log(typeof currAutoGroups);
+                nullResults = false;
+            }
+            // loop through existing chrome tab groups
+            for (chromeGroup of existingChromeGroups) {
+                idInChrome = chromeGroup.id;
 
-          // see if chrome tab group id matches existing autogroup
-          matchingAutoGroup = null;
-          if (nullResults == false) {
-            matchingAutoGroup = currAutoGroups.find(
-                      (g) => g.idInChrome === idInChrome
+                // see if chrome tab group id matches existing autogroup
+                matchingAutoGroup = null;
+                console.log;
+                if (nullResults == false) {
+                    matchingAutoGroup = currAutoGroups.find(
+                        (g) => g.idInChrome === idInChrome
                     );
-                    console.log('foobar');
                     console.log(matchingAutoGroup);
-          }
-        
-        if (matchingAutoGroup == null) {
-          console.log(
-            'syncChromeAutoGroups -- creating matching autogroup: ',
-            chromeGroup.title
-          );
-          createAutoGroup(chromeGroup);
-          console.log('autoGroups: ', autoGroups);
-        }
-      }
+                }
+
+                if (matchingAutoGroup == null) {
+                    console.log(
+                        'syncChromeAutoGroups -- creating matching autogroup: ',
+                        chromeGroup.title
+                    );
+                    createAutoGroup(chromeGroup);
+                    console.log('autoGroups: ', autoGroups);
+                }
+            }
+        });
     });
-  });
 };
 
 ///////////////////////////////////////////////////////////////////////
@@ -703,31 +725,29 @@ const handleTabGrouping = async (tab) => {
  * @param {*} chromeGroup
  */
 function createAutoGroup(chromeGroup) {
-  // access and update tabGroups in local Chrome storage
-  chrome.storage.local.get(['tabGroups'], (result) => {
-    const updatedTabGroups = result.tabGroups || {};
+    // access and update tabGroups in local Chrome storage
+    chrome.storage.local.get(['tabGroups'], (result) => {
+        const updatedTabGroups = result.tabGroups || {};
 
-    const newAutoGroup = {
-      id: Date.now().toString(),
-      idInChrome: chromeGroup.id,
-      title: chromeGroup.title,
-      color: chromeGroup.color,
-      patterns: [],
-    };
+        const newAutoGroup = {
+            id: Date.now().toString(),
+            idInChrome: chromeGroup.id,
+            title: chromeGroup.title,
+            color: chromeGroup.color,
+            patterns: [],
+        };
 
-    updatedTabGroups[newAutoGroup.id] = newAutoGroup;
-    chrome.storage.local.set({ tabGroups: updatedTabGroups }, () => {
-      console.log(
-        `Updated tabGroup storage for group ID ${newAutoGroup.title}:`,
-        updatedTabGroups
-      );
+        updatedTabGroups[newAutoGroup.id] = newAutoGroup;
+        chrome.storage.local.set({ tabGroups: updatedTabGroups }, () => {
+            console.log(
+                `Updated tabGroup storage for group ID ${newAutoGroup.title}:`,
+                updatedTabGroups
+            );
+        });
+
+        // sync autoGroups with local storage content
+        autoGroups = updatedTabGroups;
     });
-  });
-
-  // sync autoGroups with Chrome local storage
-  chrome.storage.local.get(['tabGroups'], (result) => {
-    autoGroups = Object.values(result.tabGroups);
-  });
 }
 
 /** updateAutoGroup()
@@ -879,20 +899,27 @@ function tabToAutoGroup(tab) {
       }
       console.log(recAutoGroupTitle);
       console.log('recommended autogroup: ', recAutoGroupTitle);
-      recAutoGroup = Object.values(autoGroups).find(
-        (group) => group.title === recAutoGroupTitle
-      );
+        if (recAutoGroupTitle === 'Misc') {
+            console.log('ungrouping');
+            chrome.tabs.ungroup(tab.id);
+            chrome.tabs.move(tab.id, { index: -1 });
+        } else {
 
-      // only make the group change if
-      if (recAutoGroup != null) {
-        recAutoGroupIdInChrome = recAutoGroup.idInChrome;
-        assignGroup(tab, recAutoGroupIdInChrome);
-      } else {
-        console.log(
-          'Could not find the recommended group assignment in existing autogroups: ' +
-            recAutoGroupTitle
-        );
-      }
+            recAutoGroup = Object.values(autoGroups).find(
+                (group) => group.title === recAutoGroupTitle
+            );
+
+            // only make the group change if
+            if (recAutoGroup != null) {
+                recAutoGroupIdInChrome = recAutoGroup.idInChrome;
+                assignGroup(tab, recAutoGroupIdInChrome);
+            } else {
+                console.log(
+                    'Could not find the recommended group assignment in existing autogroups: ' +
+                    recAutoGroupTitle
+                );
+            }
+        }
     })
     .catch((error) => {
       console.error('Error in tabToAutoGroup: ', error);
