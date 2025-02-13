@@ -77,17 +77,30 @@ const groqCallDelay = 50;
 ///////////////////////////////////////////////////////////////////////
 
 async function getLlmResponse(inText) {
+    llmOutput = '';
     if (model == 0) {
-        return getGroqResponse(inText);
+        llmOutput = getGroqResponse(inText);
     }
     else if (model == 1) {
-        return getOpenAiResponse(inText);
+        llmOutput = getOpenAiResponse(inText);
     }
     else if (model == 2) {
-        return getOllamaResponse(inText);
+        llmOutput = getOllamaResponse(inText);
     }
+    cleanOutput = cleanOutput(llmOutput);
+    return cleanOutput;
+}
+
+async function cleanString(inText) {
+
+    cleanOutput = inText.toLowerCase();
+    cleanOutput = inText.trim();
+    cleanOutput = inText.replace(' ', '');
+    cleanOutput = inText.replace('/n', '');
+    cleanOutput = inText.replace('!')
 
 
+    return cleanOutput;
 }
 
 async function getOllamaResponse(inText) {
@@ -247,8 +260,8 @@ async function getAutoGroupRec(tab) {
   const groupData = [];
   const currentTime = Date.now();
   let recAutoGroupTitle = null;
-  for (group of groups) {
-    groupData.push(group.title);
+    for (group of groups) {
+    groupData.push(cleanString(group.title));
   }
 
   const prompt =
@@ -1068,6 +1081,9 @@ chrome.tabGroups.onCreated.addListener((group, changeInfo) => {
     createAutoGroup(chromeGroup);
   });
 });
+
+//Listen for tab groups opening
+chrome.tabGroups.on
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
