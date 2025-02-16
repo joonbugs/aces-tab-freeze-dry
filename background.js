@@ -94,15 +94,17 @@ async function getLlmResponse(inText) {
 async function cleanString(inText) {
     console.log('cleanString called on the string: ', inText);
     //make inText a string so we can leverage string cleaning
-    let _inText = String(inText);
-    let cleanOutput = _inText.toLowerCase();
-    console.log("cleaned output is: ", cleanOutput);
+    if (typeof inText !== 'string') {
+        console.error('inText is not a string. Instead got: ', inText)
+    }
+    let cleanOutput = inText.toLowerCase();
+    console.log("string to be cleaned: ", cleanOutput);
 
-    cleanOutput = _inText.trim();
-    cleanOutput = _inText.replace(/ /g, '');
-    cleanOutput = _inText.replace(' ', '');
-    cleanOutput = _inText.replace('/n', '');
-    cleanOutput = _inText.replace('!')
+    cleanOutput = cleanOutput.trim();
+    cleanOutput = cleanOutput.replace(/\s+/g, '');
+    cleanOutput = cleanOutput.replace(' ', '');
+    cleanOutput = cleanOutput.replace('/n', '');
+    cleanOutput = cleanOutput.replace('!')
 
     console.log('cleaned string output as: ', cleanOutput);
 
@@ -972,7 +974,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       // 2. if yes (do nothing) / if no (find new group)
       chrome.tabGroups.get(tab.groupId).then((inGroup) => {
         // check if current group still fits
-        newGroupTitle = inGroup.title;
+        const newGroupTitle = inGroup.title;
         console.log(inGroup);
 
         const inText = `You are not interacting with a human user and are instead acting as a piece software. Your job is to ensure that, when a tab's url changes, the tab group the tab is in still fits. For example, you may receive a title such as 'The Food Network' for tabs that belong in food related groups, or 'spotify' for tabs that belong in music related groups. The following text is related to your input data. The title of the tab has changed to:[ ${title} ]. Currently, this tab is in the current group: [ ${newGroupTitle} ]. Is this group a good fit? Return only the word true or false. Do not add any text formatting of any kind`;
@@ -980,15 +982,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 
           getLlmResponse(inText).then((response) => {
-              getLlmResponse(response).then((groupCheck) => {
-                  console.log('groq called with the inText: ', groupCheck);
-                  //if (groupCheck.endsWith(' \n')) {
-                  //console.log('groupCheck trimmed');
-                  //groupCheck = groupCheck.slice(0, -2); //remove last three chars
-                  //}
+              console.log('Response from getGroqResponse:', response);
 
-                  // only assign if no / false
-                  console.log(groupCheck);
+              getLlmResponse(response).then((groupCheck) => {
+                  console.log('Result from cleanString:', groupCheck);
+
                   if (groupCheck !== 'true') {
                       console.log('Group refit detected!!');
                       tabToAutoGroup(tab);
