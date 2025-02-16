@@ -77,7 +77,7 @@ const groqCallDelay = 50;
 ///////////////////////////////////////////////////////////////////////
 
 async function getLlmResponse(inText) {
-    llmOutput = '';
+    cleanOutput = '';
     if (model == 0) {
         llmOutput = getGroqResponse(inText);
     }
@@ -87,18 +87,24 @@ async function getLlmResponse(inText) {
     else if (model == 2) {
         llmOutput = getOllamaResponse(inText);
     }
-    cleanOutput = cleanOutput(llmOutput);
+    cleanOutput = cleanString(llmOutput);
     return cleanOutput;
 }
 
 async function cleanString(inText) {
+    console.log('cleanString called on the string: ', inText);
+    //make inText a string so we can leverage string cleaning
+    let _inText = String(inText);
+    let cleanOutput = _inText.toLowerCase();
+    console.log("cleaned output is: ", cleanOutput);
 
-    cleanOutput = inText.toLowerCase();
-    cleanOutput = inText.trim();
-    cleanOutput = inText.replace(' ', '');
-    cleanOutput = inText.replace('/n', '');
-    cleanOutput = inText.replace('!')
+    cleanOutput = _inText.trim();
+    cleanOutput = _inText.replace(/ /g, '');
+    cleanOutput = _inText.replace(' ', '');
+    cleanOutput = _inText.replace('/n', '');
+    cleanOutput = _inText.replace('!')
 
+    console.log('cleaned string output as: ', cleanOutput);
 
     return cleanOutput;
 }
@@ -183,6 +189,7 @@ async function getGroqResponse(inText) {
 
     const result = await response.json();
 
+      console.log("inText in GroqResponse is: ", inText);
     console.log('Full response:', result); // Debugging: Log the full response to understand its structure
 
     // Ensure 'choices' exists and is an array before accessing it
@@ -270,7 +277,8 @@ async function getAutoGroupRec(tab) {
     "' to? Your reply should be one string of data with no spaces, and must match the group name exactly. The group data is: '" +
     groupData +
     "'. If no appropriate group can be approximated, reply with 'Misc'. Otherwise, reply with only the selected group name exactly as it appears. Do not add in any formatting of any kind";
-  recAutoGroupTitle = await getLlmResponse(prompt);
+    recAutoGroupTitle = await getLlmResponse(prompt);
+    recAutoGroupTitle = cleanString(recAutoGroupTitle);
 
   return recAutoGroupTitle;
 }
@@ -966,27 +974,31 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         // check if current group still fits
         newGroupTitle = inGroup.title;
         console.log(inGroup);
+
         const inText = `You are not interacting with a human user and are instead acting as a piece software. Your job is to ensure that, when a tab's url changes, the tab group the tab is in still fits. For example, you may receive a title such as 'The Food Network' for tabs that belong in food related groups, or 'spotify' for tabs that belong in music related groups. The following text is related to your input data. The title of the tab has changed to:[ ${title} ]. Currently, this tab is in the current group: [ ${newGroupTitle} ]. Is this group a good fit? Return only the word true or false. Do not add any text formatting of any kind`;
         console.log(inText);
 
-        getLlmResponse(inText).then((groupCheck) => {
-          console.log('groq called');
-          if (groupCheck.endsWith(' \n')) {
-            console.log('groupCheck trimmed');
-            groupCheck = groupCheck.slice(0, -2); //remove last three chars
-          }
 
-          // only assign if no / false
-          console.log(groupCheck);
-          if (groupCheck !== 'true') {
-            console.log('Group refit detected!!');
-            tabToAutoGroup(tab);
-            // TODO make group assignment a method with tab and group as inputs
-          } else {
-            console.log('Tab reassignment to another group not needed.');
-          }
-        });
-      });
+          getLlmResponse(inText).then((response) => {
+              getLlmResponse(response).then((groupCheck) => {
+                  console.log('groq called with the inText: ', groupCheck);
+                  //if (groupCheck.endsWith(' \n')) {
+                  //console.log('groupCheck trimmed');
+                  //groupCheck = groupCheck.slice(0, -2); //remove last three chars
+                  //}
+
+                  // only assign if no / false
+                  console.log(groupCheck);
+                  if (groupCheck !== 'true') {
+                      console.log('Group refit detected!!');
+                      tabToAutoGroup(tab);
+                      // TODO make group assignment a method with tab and group as inputs
+                  } else {
+                      console.log('Tab reassignment to another group not needed.');
+                  }
+              });
+          });
+       });
       // construct a formatted string to take changeInfo.url and send to llm with current group
       // You can add additional logic here to handle the URL change
     }
