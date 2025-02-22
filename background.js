@@ -45,10 +45,11 @@
 
 // Groq Variables
 const url = 'https://api.groq.com/openai/v1/chat/completions';
-const ollamaUrl = 'http://localhost:11434/api/chat'
+//const ollamaUrl = 'http://localhost:11434/api/chat'
+const ollamaUrl = '192.168.1.98:11434/api/chat';
 const groqapikey = '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';
 const openAIapikey = '';
-const model = 0; // 0 = groq, 1 = openAI, 2 = Ollama
+const model = 2; // 0 = groq, 1 = openAI, 2 = Ollama
 
 // Global variables
 let autoCloseEnabled = false; // Variable to manage auto close state
@@ -78,6 +79,7 @@ const groqCallDelay = 50;
 
 async function getLlmResponse(inText) {
     cleanOutput = '';
+    llmOutput = '';
     if (model == 0) {
         llmOutput = getGroqResponse(inText);
     }
@@ -91,14 +93,13 @@ async function getLlmResponse(inText) {
     return cleanOutput;
 }
 
-async function cleanString(inText) {
-    console.log('cleanString called on the string: ', inText);
+function cleanString(inText) {  //CHANGE FROM async function TO function
+    console.log('cleanString input detected: ', inText);
     //make inText a string so we can leverage string cleaning
     if (typeof inText !== 'string') {
         console.error('inText is not a string. Instead got: ', inText)
     }
     let cleanOutput = inText.toLowerCase();
-    console.log("string to be cleaned: ", cleanOutput);
 
     cleanOutput = cleanOutput.trim();
     cleanOutput = cleanOutput.replace(/\s+/g, '');
@@ -106,7 +107,7 @@ async function cleanString(inText) {
     cleanOutput = cleanOutput.replace('/n', '');
     cleanOutput = cleanOutput.replace('!')
 
-    console.log('cleaned string output as: ', cleanOutput);
+    console.log('cleaned string output is: ', cleanOutput);
 
     return cleanOutput;
 }
@@ -191,14 +192,14 @@ async function getGroqResponse(inText) {
 
     const result = await response.json();
 
-      console.log("inText in GroqResponse is: ", inText);
+      console.log("inText in getGroqResponse is: ", inText);
     console.log('Full response:', result); // Debugging: Log the full response to understand its structure
 
     // Ensure 'choices' exists and is an array before accessing it
     if (result.choices && result.choices.length > 0) {
       const responseText = result.choices[0].message.content;
-      //console.log('Parsed response:', responseText);  // Debugging: Log the parsed response
-      return responseText;
+      console.log('Parsed response:', responseText);  // Debugging: Log the parsed response
+      return cleanString(responseText); //TODO MUST PARSE THE RESPONSE TEXT OUT OF THE CHATCOMPLETION DATA STRUCTURE BEFORE RETURN
     } else {
       console.error('No choices found in response:', result);
       return null;
@@ -208,7 +209,7 @@ async function getGroqResponse(inText) {
     return null;
   }
 }
-/*
+
 async function getOpenAIResponse(inText) {
     // Ensure your API key is defined (e.g., process.env.OPENAI_API_KEY)
     const url = 'https://api.openai.com/v1/chat/completions';
@@ -254,7 +255,7 @@ if (result.choices && result.choices.length > 0) {
     return null;
 }
 }
-*/
+
 
 /** getAutoGroupRec()
 // given a tab, will query an LLM to find best fit from existing autogroups
@@ -974,7 +975,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       // 2. if yes (do nothing) / if no (find new group)
       chrome.tabGroups.get(tab.groupId).then((inGroup) => {
         // check if current group still fits
-        const newGroupTitle = inGroup.title;
+        const newGroupTitle = cleanString(inGroup.title); //CHANGED FROM inGroup.title TO cleanString(inGroup.title)
         console.log(inGroup);
 
         const inText = `You are not interacting with a human user and are instead acting as a piece software. Your job is to ensure that, when a tab's url changes, the tab group the tab is in still fits. For example, you may receive a title such as 'The Food Network' for tabs that belong in food related groups, or 'spotify' for tabs that belong in music related groups. The following text is related to your input data. The title of the tab has changed to:[ ${title} ]. Currently, this tab is in the current group: [ ${newGroupTitle} ]. Is this group a good fit? Return only the word true or false. Do not add any text formatting of any kind`;
