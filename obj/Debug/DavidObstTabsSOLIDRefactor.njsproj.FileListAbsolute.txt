@@ -1,0 +1,3 @@
+C:\Users\david\source\repos\DavidObstTabsSOLIDRefactor\DavidObstTabsSOLIDRefactor\obj\Debug\DavidObstTabsSOLIDRefactor.njsproj.AssemblyReference.cache
+C:\Users\david\source\repos\DavidObstTabsSOLIDRefactor\DavidObstTabsSOLIDRefactor\obj\Debug\DavidObstTabsSOLIDRefactor.njsproj.CoreCompileInputs.cache
+C:\Users\david\source\repos\DavidObstTabsSOLIDRefactor\DavidObstTabsSOLIDRefactor\bin\Microsoft.NodejsTools.WebRole.dll

@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tab.classList.add('nav-tab--active');
             const contentId = tab.id.replace('Btn', 'Content');
             document.getElementById(contentId).classList.add('popup-content--active');
-            
+
             // Call the corresponding tab's script function if needed
             if (tab.id === 'openTabsBtn') {
                 displayTabs(); // This will be defined in openTabs.js

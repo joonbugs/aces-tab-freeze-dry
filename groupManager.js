@@ -1,0 +1,16 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////                   IMPORTS AND EXPORTS                   ///////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+import { autoGroups, allowManualGroupAccess } from './config.js';
+
+export const handleTabGrouping = async (tab) => {
+    // Implementation of tab grouping logic...
+};
+
+export const isPinnedGroup = async (groupId) => {
+    const result = await chrome.storage.local.get(['pinnedGroups']);
+    const pinnedGroups = result.pinnedGroups || {};
+    return Boolean(pinnedGroups[groupId]);
+};
+
+// Define other group-related functions here...
