@@ -3,8 +3,20 @@ const path = require('path');
 module.exports = {
     entry: './src/background.js',
     output: {
-        filename: 'background.bundle.js',
+        filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist')
     },
-    mode: 'development'
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader'
+                }
+            }
+        ]
+    },
+    mode: 'development',
+    devtool: 'source-map'
 };

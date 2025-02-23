@@ -2,18 +2,19 @@
 ///////////////////////////////////////                   IMPORTS AND EXPORTS                   ///////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-import { initializeExtension } from './config.js';
+import { config } from './config.js';
 //import { setupEventListeners } from './eventListeners.js';
 
 //console.error('Service worker started');
 
 chrome.runtime.onInstalled.addListener(() => {
-    console.error('Extension installed');
-    //initializeExtension();
+    console.error('NOT AN ERROR background.js: Extension installed');
+
+    console.error('NOT AN ERROR stored groqapikey is', config.groqapikey); // for debugging purposes
 });
 
 chrome.runtime.onStartup.addListener(() => {
-    console.error('Extension started');
+    console.error('NOT AN ERROR background.js: Extension started');
     //    initializeExtension();
 });
 
