@@ -168,6 +168,30 @@ var getVariables = /*#__PURE__*/function () {
   };
 }();
 
+/***/ }),
+
+/***/ "./src/utils.js":
+/*!**********************!*\
+  !*** ./src/utils.js ***!
+  \**********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   cleanString: () => (/* binding */ cleanString)
+/* harmony export */ });
+function cleanString(inText) {
+  console.error('NOT AN ERROR utils.js cleanString called on the string: ', inText);
+  var cleanOutput = inText.toLowerCase();
+  console.log("string to be cleaned: ", cleanOutput);
+  cleanOutput = cleanOutput.trim();
+  cleanOutput = cleanOutput.replace(/\s+/g, '');
+  cleanOutput = cleanOutput.replace(' ', '');
+  cleanOutput = cleanOutput.replace('/n', '');
+  cleanOutput = cleanOutput.replace('!', '');
+  console.error('NOT AN ERROR utils.js cleaned string output as: ', cleanOutput);
+}
+
 /***/ })
 
 /******/ 	});
@@ -234,9 +258,11 @@ var __webpack_exports__ = {};
   \***************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _config_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./config.js */ "./src/config.js");
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils.js */ "./src/utils.js");
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////                   IMPORTS AND EXPORTS                   ///////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 //import { setupEventListeners } from './eventListeners.js';
@@ -245,7 +271,9 @@ __webpack_require__.r(__webpack_exports__);
 
 chrome.runtime.onInstalled.addListener(function () {
   console.error('NOT AN ERROR background.js: Extension installed');
-  console.error('NOT AN ERROR stored groqapikey is', _config_js__WEBPACK_IMPORTED_MODULE_0__.config.groqapikey);
+  console.error('NOT AN ERROR stored groqapikey is', _config_js__WEBPACK_IMPORTED_MODULE_0__.config.groqapikey); // for debugging purposes
+
+  (0,_utils_js__WEBPACK_IMPORTED_MODULE_1__.cleanString)('Lorem ipsum dolor sit amet');
 });
 chrome.runtime.onStartup.addListener(function () {
   console.error('NOT AN ERROR background.js: Extension started');
