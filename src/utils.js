@@ -1,4 +1,5 @@
-
+//import config so utils can have access to autoGroups
+import { config } from './config.js';
 
 export function cleanString(inText) {
     console.error('NOT AN ERROR utils.js cleanString called on the string: ', inText);
@@ -13,4 +14,8 @@ export function cleanString(inText) {
     cleanOutput = cleanOutput.replace('!', '');
 
     console.error('NOT AN ERROR utils.js cleaned string output as: ', cleanOutput);
+}
+
+export function getGroupNames() {
+    //TODO implement the retrieval of groupNames here, returning a list of cleaned strings
 }

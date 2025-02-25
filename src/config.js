@@ -1,9 +1,9 @@
 // Define Global and Environmental Variables
-export const url = 'https://api.groq.com/openai/v1/chat/completions';
+export const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
 export const ollamaUrl = 'http://localhost:11434/api/chat';
 export const groqapikey = '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';
 export const openAIapikey = '';
-export const model = 0; // 0 = groq, 1 = openAI, 2 = Ollama
+export const model = 2; // 0 = Ollama, 1 = openAI, 2 = groq
 export let autoCloseEnabled = false;
 export let autoCloseTime = { minutes: 120, seconds: 0 };
 export let lazyLoadingEnabled = false;
