@@ -2,7 +2,7 @@
 import { config } from './config.js';
 
 export function cleanString(inText) {
-    console.error('NOT AN ERROR utils.js cleanString called on the string: ', inText);
+    console.log('NOT AN ERROR utils.js cleanString called on the string: ', inText);
 
     let cleanOutput = inText.toLowerCase();
     console.log("string to be cleaned: ", cleanOutput);
@@ -13,7 +13,7 @@ export function cleanString(inText) {
     cleanOutput = cleanOutput.replace('/n', '');
     cleanOutput = cleanOutput.replace('!', '');
 
-    console.error('NOT AN ERROR utils.js cleaned string output as: ', cleanOutput);
+    console.log('NOT AN ERROR utils.js cleaned string output as: ', cleanOutput);
 }
 
 export function getGroupNames() {

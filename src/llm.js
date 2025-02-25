@@ -4,7 +4,8 @@ import { cleanString } from './utils.js';
 
 
 export async function chatCompletion(inText) {
-    console.error('NOT AN ERROR llm.js model index is: ', config.model);
+    console.log('NOT AN ERROR llm.js model index is: ', config.model);
+    console.log('NOT AN ERROR llm.js intext is: ', inText);
     let cleanOutput = '';
     let llmOutput = '';
 
@@ -17,7 +18,7 @@ export async function chatCompletion(inText) {
     }
     else if (config.model == 2) {
         llmOutput = await getGroqResponse(inText);
-        console.error('NOT AN ERROR llm.js llmOutput is: ', llmOutput);
+        console.log('NOT AN ERROR llm.js llmOutput is: ', llmOutput);
     }
     cleanOutput = cleanString(llmOutput);
     return cleanOutput;
@@ -106,7 +107,7 @@ async function getGroqResponse(inText) {
 
         console.log("inText in GroqResponse is: ", inText);
         console.log('Full response:', result); // Debugging: Log the full response to understand its structure
-
+        
         // Ensure 'choices' exists and is an array before accessing it
         if (result.choices && result.choices.length > 0) {
             const responseText = result.choices[0].message.content;

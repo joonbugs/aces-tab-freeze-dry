@@ -54,8 +54,8 @@ var autoGroups = [];
 var allowManualGroupAccess = false;
 var tabAccessTimes = {};
 var config = {
-  get url() {
-    return url;
+  get groqUrl() {
+    return groqUrl;
   },
   get ollamaUrl() {
     return ollamaUrl;
@@ -104,7 +104,7 @@ var initializeExtension = /*#__PURE__*/function () {
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
-          console.error('NOT AN ERROR config.js: initializatExtension called');
+          console.log('NOT AN ERROR config.js: initializatExtension called');
           _context.prev = 1;
           _context.next = 4;
           return getVariables();
@@ -150,7 +150,7 @@ var getVariables = /*#__PURE__*/function () {
           autoGroupingEnabled = result.autoGroupingEnabled || false;
           autoGroups = result.tabGroups || [];
           allowManualGroupAccess = result.allowManualGroupAccess || false;
-          console.error('NOT AN ERROR Variables Loaded', autoCloseEnabled, JSON.stringify(autoCloseTime), lazyLoadingEnabled, autoSleepEnabled, autoSleepTime, autoGroupingEnabled, autoGroups, allowManualGroupAccess);
+          console.log('NOT AN ERROR Variables Loaded', autoCloseEnabled, JSON.stringify(autoCloseTime), lazyLoadingEnabled, autoSleepEnabled, autoSleepTime, autoGroupingEnabled, autoGroups, allowManualGroupAccess);
           _context2.next = 18;
           break;
         case 15:
@@ -197,38 +197,39 @@ function _chatCompletion() {
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
-          console.error('NOT AN ERROR llm.js model index is: ', _config_js__WEBPACK_IMPORTED_MODULE_0__.config.model);
+          console.log('NOT AN ERROR llm.js model index is: ', _config_js__WEBPACK_IMPORTED_MODULE_0__.config.model);
+          console.log('NOT AN ERROR llm.js intext is: ', inText);
           cleanOutput = '';
           llmOutput = '';
           if (!(_config_js__WEBPACK_IMPORTED_MODULE_0__.config.model == 0)) {
-            _context.next = 7;
+            _context.next = 8;
             break;
           }
           llmOutput = inText;
           //llmOutput = getOllamaResponse(inText);
-          _context.next = 15;
+          _context.next = 16;
           break;
-        case 7:
+        case 8:
           if (!(_config_js__WEBPACK_IMPORTED_MODULE_0__.config.model == 1)) {
-            _context.next = 10;
+            _context.next = 11;
             break;
           }
-          _context.next = 15;
+          _context.next = 16;
           break;
-        case 10:
+        case 11:
           if (!(_config_js__WEBPACK_IMPORTED_MODULE_0__.config.model == 2)) {
-            _context.next = 15;
+            _context.next = 16;
             break;
           }
-          _context.next = 13;
+          _context.next = 14;
           return getGroqResponse(inText);
-        case 13:
+        case 14:
           llmOutput = _context.sent;
-          console.error('NOT AN ERROR llm.js llmOutput is: ', llmOutput);
-        case 15:
+          console.log('NOT AN ERROR llm.js llmOutput is: ', llmOutput);
+        case 16:
           cleanOutput = (0,_utils_js__WEBPACK_IMPORTED_MODULE_1__.cleanString)(llmOutput);
           return _context.abrupt("return", cleanOutput);
-        case 17:
+        case 18:
         case "end":
           return _context.stop();
       }
@@ -396,15 +397,15 @@ __webpack_require__.r(__webpack_exports__);
 //import config so utils can have access to autoGroups
 
 function cleanString(inText) {
-  console.error('NOT AN ERROR utils.js cleanString called on the string: ', inText);
-  var cleanOutput = String(inText).toLowerCase();
+  console.log('NOT AN ERROR utils.js cleanString called on the string: ', inText);
+  var cleanOutput = inText.toLowerCase();
   console.log("string to be cleaned: ", cleanOutput);
   cleanOutput = cleanOutput.trim();
   cleanOutput = cleanOutput.replace(/\s+/g, '');
   cleanOutput = cleanOutput.replace(' ', '');
   cleanOutput = cleanOutput.replace('/n', '');
   cleanOutput = cleanOutput.replace('!', '');
-  console.error('NOT AN ERROR utils.js cleaned string output as: ', cleanOutput);
+  console.log('NOT AN ERROR utils.js cleaned string output as: ', cleanOutput);
 }
 function getGroupNames() {
   //TODO implement the retrieval of groupNames here, returning a list of cleaned strings
@@ -496,9 +497,10 @@ chrome.runtime.onInstalled.addListener(function () {
 
   //cleanString('Lorem ipsum dolor sit amet
   (0,_llm_js__WEBPACK_IMPORTED_MODULE_2__.chatCompletion)('This is a test string. Reply with the words {Test Passed}');
+  console.log('GROQ URL IS: ', _config_js__WEBPACK_IMPORTED_MODULE_0__.config.groqUrl);
 });
 chrome.runtime.onStartup.addListener(function () {
-  console.error('NOT AN ERROR background.js: Extension started');
+  console.log('NOT AN ERROR background.js: Extension started');
   //    initializeExtension();
 });
 

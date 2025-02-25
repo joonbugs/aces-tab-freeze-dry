@@ -15,7 +15,7 @@ export let allowManualGroupAccess = false;
 export const tabAccessTimes = {};
 
 export const config = {
-    get url() { return url; },
+    get groqUrl() { return groqUrl; },
     get ollamaUrl() { return ollamaUrl; },
     get groqapikey() { return groqapikey; },
     get openAIapikey() { return openAIapikey; },
@@ -34,7 +34,7 @@ export const config = {
 };
 
 export const initializeExtension = async () => {
-    console.error('NOT AN ERROR config.js: initializatExtension called');
+    console.log('NOT AN ERROR config.js: initializatExtension called');
     
     try {
         await getVariables();
@@ -70,7 +70,7 @@ export const getVariables = async () => {
         autoGroupingEnabled = result.autoGroupingEnabled || false;
         autoGroups = result.tabGroups || [];
         allowManualGroupAccess = result.allowManualGroupAccess || false;
-        console.error(
+        console.log(
             'NOT AN ERROR Variables Loaded',
             autoCloseEnabled,
             JSON.stringify(autoCloseTime),

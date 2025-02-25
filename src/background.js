@@ -16,10 +16,11 @@ chrome.runtime.onInstalled.addListener(() => {
 
     //cleanString('Lorem ipsum dolor sit amet
     chatCompletion('This is a test string. Reply with the words {Test Passed}');
+    console.log('GROQ URL IS: ', config.groqUrl);
 });
 
 chrome.runtime.onStartup.addListener(() => {
-    console.error('NOT AN ERROR background.js: Extension started');
+    console.log('NOT AN ERROR background.js: Extension started');
     //    initializeExtension();
 });
 
