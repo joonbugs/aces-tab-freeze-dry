@@ -923,7 +923,7 @@ function tabToAutoGroup(tab) {
       }
       console.log(recAutoGroupTitle);
       console.log('recommended autogroup: ', recAutoGroupTitle);
-        if (recAutoGroupTitle === 'Misc') {
+        if (recAutoGroupTitle === 'misc') {
             console.log('ungrouping');
             chrome.tabs.ungroup(tab.id);
             chrome.tabs.move(tab.id, { index: -1 });
