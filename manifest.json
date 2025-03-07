@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Tab Manager Extension",
+    "name": "Aces Tab Manager Extension",
     "version": "1.0",
     "description": "Manage your tabs efficiently with features like grouping, snoozing, and session management.",
     "permissions": [

@@ -79,19 +79,19 @@ const groqCallDelay = 50;
 async function getLlmResponse(inText) {
     cleanOutput = '';
     if (model == 0) {
-        llmOutput = getGroqResponse(inText);
+        llmOutput = await getGroqResponse(inText);
     }
     else if (model == 1) {
-        llmOutput = getOpenAiResponse(inText);
+        llmOutput = await getOpenAiResponse(inText);
     }
     else if (model == 2) {
-        llmOutput = getOllamaResponse(inText);
+        llmOutput = await getOllamaResponse(inText);
     }
     cleanOutput = cleanString(llmOutput);
     return cleanOutput;
 }
 
-async function cleanString(inText) {
+function cleanString(inText) {
     console.log('cleanString called on the string: ', inText);
     //make inText a string so we can leverage string cleaning
     if (typeof inText !== 'string') {
@@ -271,6 +271,7 @@ async function getAutoGroupRec(tab) {
   let recAutoGroupTitle = null;
     for (group of groups) {
     groupData.push(cleanString(group.title));
+    console.log('TITLE cleaned title is: ', cleanString(group.title));
   }
 
   const prompt =
@@ -929,7 +930,7 @@ function tabToAutoGroup(tab) {
         } else {
 
             recAutoGroup = Object.values(autoGroups).find(
-                (group) => group.title === recAutoGroupTitle
+                (group) => cleanString(group.title) === recAutoGroupTitle
             );
 
             // only make the group change if
