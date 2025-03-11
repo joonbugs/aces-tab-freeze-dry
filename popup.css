@@ -186,6 +186,8 @@ button {
 .close-button,
 .mute-button,
 .sleep-button,
+.move-up-button,
+.move-down-button,
 .collapse-expand-button,
 .collapse-expand-arrow {
   width: 20px;
