@@ -62,6 +62,7 @@ let GroupingFunctioning = false;
 let allowManualGroupAccess = false;
 let isGrouping = false; // Lock variable
 const tabAccessTimes = {};
+const excludedTitles = ['extensions', 'newtab'];
 
 //for creation of a test set of prompts
 let usageData = [];
@@ -271,7 +272,7 @@ async function getAutoGroupRec(tab) {
     console.log("tab title is: ", cleanString(tab.title));
 
 
-    if (cleanString(tab.title) !== 'extensions'|| cleanString(tab.title) !== 'newtab') {
+    if (!excludedTitles.includes(cleanString(tab.title))) {
         if (groups.length >= 1) {
             const groupData = [];
             const currentTime = Date.now();
@@ -359,7 +360,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   // }
 
   try {
-    saveUsageData('inText [tabTitle] [inText(cont)] [groupNames] [inText(final)]', 'Model Name', 'actualOutput');
+      saveUsageData('inText [groupNames] [inText(cont)] [tabTitle] [inText(final)]', 'Model Name', 'actualOutput');
     await getVariables();
     // await loadLazyLoadingSettings(); // Load lazy loading settings first
     await migratePinnedGroups(); // Migrate pinned groups
