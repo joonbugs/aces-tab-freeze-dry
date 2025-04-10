@@ -63,6 +63,7 @@ let allowManualGroupAccess = false;
 let isGrouping = false; // Lock variable
 const tabAccessTimes = {};
 const excludedTitles = ['extensions', 'newtab'];
+let history = [];
 
 //for creation of a test set of prompts
 let usageData = [];
@@ -345,8 +346,10 @@ function downloadUsageData(usageData) {
 }
 
 function getHistory(startDate, endDate) {
-  return new Promise((resolve, reject) => {
-    const startTime = startDate ? new Date(startDate).getTime() : 0; // Default: Earliest possible time
+    return new Promise((resolve, reject) => {
+      //console.log("start date is: ", startDate);
+      const startTime = startDate ? new Date(startDate).getTime() : 0; // Default: Earliest possible time
+      //console.log("start time is: ", startTime);
     const endTime = endDate ? new Date(endDate).getTime() : Date.now(); // Default: Current time
 
     chrome.history.search(
@@ -369,6 +372,21 @@ function getHistory(startDate, endDate) {
   });
 }
 
+
+
+
+async function readCSV() {
+    const response = await fetch(chrome.runtime.getURL("usage_data (7).csv"));
+    const csvText = await response.text();
+
+    const history = csvText.split("\n").map(field =>
+        field.split(",").map(row =>
+            row.replace(/\s+/g, "").trim()
+        )
+    );
+
+    console.table(history);
+}
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -452,19 +470,21 @@ const getVariables = async () => {
 
 chrome.storage.onChanged.addListener(async (changes) => {
   // console.log(changes);
-  if (changes.autoCloseEnabled) {
+    if (changes.autoCloseEnabled) {
+        history = await getHistory("2025-02-01T00:00:00Z", null);
+        console.table(history);
     autoCloseEnabled = changes.autoCloseEnabled.newValue;
   }
   if (changes.autoCloseTime) {
       autoCloseTime = changes.autoCloseTime.newValue;
-      history = await getHistory("2024-06-01", null);
-      console.table(history);
   }
   if (changes.lazyLoadingEnabled) {
       lazyLoadingEnabled = changes.lazyLoadingEnabled.newValue;
+      await readCSV();
       //downloadUsageData(usageData);
-      history = await getHistory(null,null);
+      //history = await getHistory(null,null);
       console.table(history);
+      //downloadUsageData(history);
   }
   if (changes.autoSleepEnabled) {
     autoSleepEnabled = changes.autoSleepEnabled.newValue;
@@ -472,7 +492,7 @@ chrome.storage.onChanged.addListener(async (changes) => {
   if (changes.autoSleepTime) {
     autoSleepTime = changes.autoSleepTime.newValue;
   }
-  if (changes.autoGroupingEnabled) {
+    if (changes.autoGroupingEnabled) {
     autoGroupingEnabled = changes.autoGroupingEnabled.newValue;
     if (!autoGroupingEnabled) {
       await ungroupAllAutoGroups();
