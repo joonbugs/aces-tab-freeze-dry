@@ -46,7 +46,7 @@
 // Groq Variables
 const url = 'https://api.groq.com/openai/v1/chat/completions';
 const ollamaUrl = 'http://localhost:11434/api/chat'
-const groqapikey = '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';
+const groqapikey = '';
 const openAIapikey = '';
 const model = 2; // 0 = groq, 1 = openAI, 2 = Ollama
 
@@ -62,9 +62,11 @@ let GroupingFunctioning = false;
 let allowManualGroupAccess = false;
 let isGrouping = false; // Lock variable
 const tabAccessTimes = {};
+const excludedTitles = ['extensions', 'newtab'];
 
 //for creation of a test set of prompts
 let usageData = [];
+
 
 
 // timing variables
@@ -271,7 +273,7 @@ async function getAutoGroupRec(tab) {
     console.log("tab title is: ", cleanString(tab.title));
 
 
-    if (cleanString(tab.title) !== 'extensions'|| cleanString(tab.title) !== 'newtab') {
+    if (!excludedTitles.includes(cleanString(tab.title))) {
         if (groups.length >= 1) {
             const groupData = [];
             const currentTime = Date.now();
@@ -342,6 +344,32 @@ function downloadUsageData(usageData) {
     reader.readAsDataURL(blob);
 }
 
+function getHistory(startDate, endDate) {
+  return new Promise((resolve, reject) => {
+    const startTime = startDate ? new Date(startDate).getTime() : 0; // Default: Earliest possible time
+    const endTime = endDate ? new Date(endDate).getTime() : Date.now(); // Default: Current time
+
+    chrome.history.search(
+      { text: '', startTime, endTime, maxResults: 0 },
+      function (historyItems) {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+          return;
+        }
+
+        const historyArray = historyItems.map(item => [
+          item.url,
+          item.title || "No Title",
+          new Date(item.lastVisitTime).toISOString()
+        ]);
+
+        resolve(historyArray);
+      }
+    );
+  });
+}
+
+
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 //////                                       //////////////////////////
@@ -359,7 +387,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   // }
 
   try {
-    saveUsageData('inText [tabTitle] [inText(cont)] [groupNames] [inText(final)]', 'Model Name', 'actualOutput');
+      saveUsageData('inText [groupNames] [inText(cont)] [tabTitle] [inText(final)]', 'Model Name', 'actualOutput');
     await getVariables();
     // await loadLazyLoadingSettings(); // Load lazy loading settings first
     await migratePinnedGroups(); // Migrate pinned groups
@@ -428,11 +456,15 @@ chrome.storage.onChanged.addListener(async (changes) => {
     autoCloseEnabled = changes.autoCloseEnabled.newValue;
   }
   if (changes.autoCloseTime) {
-    autoCloseTime = changes.autoCloseTime.newValue;
+      autoCloseTime = changes.autoCloseTime.newValue;
+      history = await getHistory("2024-06-01", null);
+      console.table(history);
   }
   if (changes.lazyLoadingEnabled) {
       lazyLoadingEnabled = changes.lazyLoadingEnabled.newValue;
-      downloadUsageData(usageData);
+      //downloadUsageData(usageData);
+      history = await getHistory(null,null);
+      console.table(history);
   }
   if (changes.autoSleepEnabled) {
     autoSleepEnabled = changes.autoSleepEnabled.newValue;

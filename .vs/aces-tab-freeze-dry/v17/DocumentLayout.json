@@ -3,12 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\david\\aces-tab-freeze-dry\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\david\\aces-tab-freeze-dry\\background.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:background.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\david\\aces-tab-freeze-dry\\autoGroup.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:autoGroup.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\david\\aces-tab-freeze-dry\\popup.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:popup.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\david\\aces-tab-freeze-dry\\manifest.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:manifest.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\david\\aces-tab-freeze-dry\\popup.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:popup.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\david\\aces-tab-freeze-dry\\background.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:background.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\david\\aces-tab-freeze-dry\\content.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
@@ -22,7 +34,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Bookmark",
@@ -39,31 +51,71 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "popup.js",
+              "DocumentMoniker": "C:\\Users\\david\\aces-tab-freeze-dry\\popup.js",
+              "RelativeDocumentMoniker": "popup.js",
+              "ToolTip": "C:\\Users\\david\\aces-tab-freeze-dry\\popup.js",
+              "RelativeToolTip": "popup.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-03-25T21:05:16.319Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "popup.html",
+              "DocumentMoniker": "C:\\Users\\david\\aces-tab-freeze-dry\\popup.html",
+              "RelativeDocumentMoniker": "popup.html",
+              "ToolTip": "C:\\Users\\david\\aces-tab-freeze-dry\\popup.html",
+              "RelativeToolTip": "popup.html",
+              "ViewState": "AgIAAFIBAAAAAAAAAAAAAIsBAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-03-25T21:00:13.841Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "manifest.json",
+              "DocumentMoniker": "C:\\Users\\david\\aces-tab-freeze-dry\\manifest.json",
+              "RelativeDocumentMoniker": "manifest.json",
+              "ToolTip": "C:\\Users\\david\\aces-tab-freeze-dry\\manifest.json",
+              "RelativeToolTip": "manifest.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-03-12T21:06:14.251Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
               "Title": "autoGroup.js",
               "DocumentMoniker": "C:\\Users\\david\\aces-tab-freeze-dry\\autoGroup.js",
               "RelativeDocumentMoniker": "autoGroup.js",
               "ToolTip": "C:\\Users\\david\\aces-tab-freeze-dry\\autoGroup.js",
               "RelativeToolTip": "autoGroup.js",
-              "ViewState": "AgIAAGAAAAAAAAAAAAAgwGgAAAAiAAAAAAAAAA==",
+              "ViewState": "AgIAAFcAAAAAAAAAAAAAAGgAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-01-22T20:52:18.142Z"
+              "WhenOpened": "2025-01-22T20:52:18.142Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 4,
               "Title": "background.js",
               "DocumentMoniker": "C:\\Users\\david\\aces-tab-freeze-dry\\background.js",
               "RelativeDocumentMoniker": "background.js",
               "ToolTip": "C:\\Users\\david\\aces-tab-freeze-dry\\background.js",
               "RelativeToolTip": "background.js",
-              "ViewState": "AgIAACcAAAAAAAAAAAAowDIAAAAPAAAAAAAAAA==",
+              "ViewState": "AgIAACYAAAAAAAAAAAAwwDwAAAAgAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-01-22T20:07:51.971Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "content.js",
               "DocumentMoniker": "C:\\Users\\david\\aces-tab-freeze-dry\\content.js",
               "RelativeDocumentMoniker": "content.js",

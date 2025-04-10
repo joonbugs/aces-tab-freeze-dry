@@ -8,7 +8,8 @@
         "storage",
         "activeTab",
         "tabGroups",
-        "downloads"
+        "downloads",
+        "history"
     ],
     "host_permissions": [
         "*://*/*"
