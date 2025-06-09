@@ -56,6 +56,7 @@ function loadOptions() {
         'autoSleepTime', 
         'lazyLoadingEnabled',
         'allowManualGroupAccess',
+        'enableLLMSort'
     ], (result) => {
         const { 
             autoCloseEnabled = false, 
@@ -63,7 +64,8 @@ function loadOptions() {
             autoSleepEnabled = false, 
             autoSleepTime = { minutes: 60, seconds: 0 }, 
             lazyLoadingEnabled = false,
-            allowManualGroupAccess = false
+            allowManualGroupAccess = false,
+            enableLLMSort = false
         } = result;
 
         // Set the checkbox states
@@ -71,6 +73,7 @@ function loadOptions() {
         document.getElementById('autoSleepCheckbox').checked = autoSleepEnabled;
         document.getElementById('lazyLoadingCheckbox').checked = lazyLoadingEnabled;
         document.getElementById('allowManualGroupAccessCheckbox').checked = allowManualGroupAccess;
+        document.getElementById('enableLLMSort').checked = enableLLMSort; 
 
         // Set the time inputs
         document.getElementById('autoCloseMinutes').value = autoCloseTime.minutes;
@@ -94,6 +97,7 @@ function loadOptions() {
     document.getElementById('submitSleepTimeBtn').addEventListener('click', saveSleepTimeSettings);
     document.getElementById('lazyLoadingCheckbox').addEventListener('change', handleLazyLoadChange);
     document.getElementById('allowManualGroupAccessCheckbox').addEventListener('change', handleManualGroupAccessChange);
+    document.getElementById('enableLLMSort').addEventListener('change', handleEnableLLMSortChange);
 }
 
 function handleCheckboxChange(event) {
@@ -214,5 +218,14 @@ function handleManualGroupAccessChange(event) {
     // Save the new state to storage
     chrome.storage.local.set({ allowManualGroupAccess: isChecked }, () => {
         console.log('Allow Manual Group Access option updated:', isChecked);
+    });
+}
+
+function handleEnableLLMSortChange(event) {
+    const isChecked = event.target.checked;
+
+    // Save the new state to storage
+    chrome.storage.local.set({ enableLLMSort: isChecked }, () => {
+        console.log('Enable LLM Sort option updated:', isChecked);
     });
 }

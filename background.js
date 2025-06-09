@@ -9,6 +9,13 @@
     - getVariables: Fetches the current settings and states for features like auto-close, lazy loading, and grouping from Chrome's local storage.
     - updatePinnedGroupsStorage: Updates the local storage with the current state of pinned groups, ensuring that the extension maintains accurate information about tab groups.
 
+    Key LLM Functions:
+    - getOllamaResponse: Call the Ollama api, returning a machine generated chat completion of the input text.
+    - getNumberOfDays: Takes a given prompt and calls getOllamaResponse, with prompt engineering structured such that the api will return a number of days parsed from the human written prompt. 
+    - getHistory: Retrieves all history items going back to the date specified in the input parameters.
+    - extractKeyWords: takes a given prompt and calls getOllamaResponse, with prompt engineering structured such that the api will return a JSON containing the key task being retrieved along with a short list of keywords relating to the task specified.
+ 
+
     Storage Variables:
     - autoCloseEnabled: A boolean flag indicating whether the auto-close feature is enabled.
     - autoCloseTime: An object representing the time interval for auto-closing tabs, with `minutes` and `seconds`.
@@ -18,11 +25,15 @@
     - autoGroupingEnabled: A boolean flag to manage the auto-grouping of tabs.
     - autoGroups: An array storing details of auto-created tab groups.
     - allowManualGroupAccess: A boolean flag that determines whether users can access manually created groups.
+    - enableLLMSort: A boolean flag that determines whetehr or not the extension will leverage an LLM in the sorting of tabs
 
     Event Listeners:
     - chrome.runtime.onInstalled: Listens for the installation of the extension and opens a welcome tab.
     - chrome.runtime.onStartup: Activates when the browser starts up, ensuring all previous settings and groups are loaded.
+    - chrome.runtime.onMessage: Listens for events relating to the interface buttons, calling the appropriate functions when necessary
     - chrome.storage.onChanged: Monitors changes to storage variables and updates the global variables accordingly.
+    - chrome.tabs.onUpdated: Monitors for changes in tab urls to call the LLM api for assigment when necessary.
+    - chrome.tabGroups.onUpdated: Monitors for changes in tabGroups, triggering various processes depending on the changes made
 
     Element IDs:
     - None specified directly in this file, but various Chrome API calls are used to interact with tab groups and individual tabs.
@@ -45,7 +56,7 @@
 
 // Groq Variables
 const url = 'https://api.groq.com/openai/v1/chat/completions';
-const ollamaUrl = 'http://localhost:11434/api/chat'
+const ollamaUrl = 'http://192.168.1.98:11434/api/chat'
 const groqapikey = '';
 const openAIapikey = '';
 const model = 2; // 0 = groq, 1 = openAI, 2 = Ollama
@@ -63,6 +74,8 @@ let allowManualGroupAccess = false;
 let isGrouping = false; // Lock variable
 const tabAccessTimes = {};
 const excludedTitles = ['extensions', 'newtab'];
+let history = [];
+let enableLLMSort = false; 
 
 //for creation of a test set of prompts
 let usageData = [];
@@ -119,20 +132,21 @@ async function getOllamaResponse(inText) {
     console.log('getOllamaResponse inText: ' + inText);
     // Define the data to be sent to the Ollama API
     const data = {
-        model: "gemma2",  // Replace with the actual model name if needed
+        model: "gemma3:12b-it-qat",  // Replace with the actual model name if needed
         messages: [
             {
                 role: "user",
                 content: inText
             }
         ],
+	//prompt: "User: " + inText,
         stream: false
     };
 
     console.log('Data being sent to API:', JSON.stringify(data));
 
     try {
-        const response = await fetch('http://localhost:11434/api/chat', {
+        const response = await fetch('http://192.168.1.98:11434/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -283,13 +297,17 @@ async function getAutoGroupRec(tab) {
                 console.log('TITLE cleaned title is: ', cleanString(group.title));
             }
 
-            const prompt = `
+            /*const prompt = `
         You are not interacting with a human user and are instead functioning as a piece of software.
         Which of the following groups: ['${groupData}'] should the tab with the title: ['${tab.title}'] be added to? 
         Your reply should be one string of data with no spaces, and must match the group name exactly.
         Return the group name that the given tab most likely belongs to. It is critical that your return be either 'misc' OR one of the following group names:  ['${groupData}'] 
         Do NOT create group names where there are none. If you would create a new group where none exists, use 'misc' instead`;
-
+        */
+            const prompt = `
+        You are not interacting with a human user and are instead acting as a piece of software.
+        You will be given a list of groups and the header for a tab. Your task is to determine which of the groups the given header belongs in with no other formatting or commentary.
+        Do not create any new group names. If no group appears to be a good match, reply with 'misc' instead. The existing group names are ['${groupData}']. Which is the best fit for a tab with the title ['${tab.title}']?`;
             recAutoGroupTitle = await getLlmResponse(prompt);
             recAutoGroupTitle = cleanString(recAutoGroupTitle);
 
@@ -307,17 +325,22 @@ async function getAutoGroupRec(tab) {
     
 }
 
-function saveUsageData(inText, model, modelOutput) {  /////////////////////////////////////////////////
-    usageData.push([inText, model, modelOutput]);
+function saveUsageData(inText, model, modelOutput) {
+    const data = '${ inText }¤${ model }¤${ modelOutput } '.trim();
+    console.log(data);
+    usageData.push(data);
+    //usageData.push([inText, model, modelOutput]);
 }
 
+/*
 function downloadUsageData(usageData) {
     let csvContent = "";
     usageData.forEach(function (rowArray) {
         let expandedRow = [];
         rowArray.forEach(field => {
             // Split the field by `[` and `]` and filter out empty strings
-            let parts = field.split(/[\[\]]/).filter(part => part.trim() !== "");
+            // parts = field.split(/[\[\]]/).filter(part => part.trim() !== "");
+            let parts = field.split(",").filter(part => part.trim() !== "");
             expandedRow.push(...parts);
         });
         let row = expandedRow.map(field => `"${field.replace(/"/g, '""')}"`).join(",");
@@ -343,11 +366,70 @@ function downloadUsageData(usageData) {
     };
     reader.readAsDataURL(blob);
 }
+*/
 
-function getHistory(startDate, endDate) {
-  return new Promise((resolve, reject) => {
-    const startTime = startDate ? new Date(startDate).getTime() : 0; // Default: Earliest possible time
-    const endTime = endDate ? new Date(endDate).getTime() : Date.now(); // Default: Current time
+function downloadUsageData(usageData) {  //TODO refactor function to use data instead of usageData, as usageData is only one of two possible inputs
+    let tsvContent = "";
+    usageData.forEach(function (rowArray) {
+        let expandedRow = [];
+        rowArray.forEach(field => {
+            // Split the field by `[` and `]` and filter out empty strings
+            //let parts = field.split(/[\[\]]/).filter(part => part.trim() !== "");
+            let parts = field.split(",").filter(part => part.trim() !== "");
+            expandedRow.push(...parts);
+        });
+        let row = expandedRow.map(field => `"${field.replace(/"/g, '""')}"`).join("\t"); // Using tab instead of comma
+        tsvContent += row + "\r\n"; // Keep line breaks
+    });
+
+    const blob = new Blob([tsvContent], { type: 'text/tab-separated-values' });
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        const url = event.target.result;
+
+        chrome.downloads.download({
+            url: url,
+            filename: 'usage_data.tsv', // Changed file extension to .tsv
+            saveAs: true
+        }, function (downloadId) {
+            if (chrome.runtime.lastError) {
+                console.error('Error downloading file:', chrome.runtime.lastError);
+            } else {
+                console.log('Download started with ID:', downloadId);
+            }
+        });
+    };
+    reader.readAsDataURL(blob);
+}
+
+async function getNumberOfDays(userText) {
+    const prompt = "You are not interacting with a human user and are instead acting as a piece of software. Output in JSON format. You will be given a human prompt that will contain an expression of time. Your task is to determine the number of days specified in the contained expression. For example, a week contains 7 days and three weeks contains 21 days. A month contains 30 days and three months contains 90. Assume that terms such as 'a few' mean 3. The human prompt is as follows: "        + userText;
+    let response = await getOllamaResponse(prompt);
+    console.log("raw response: ", response.slice(7,-3));
+    let extractedContent = JSON.parse(response.slice(7, -3));
+    outDate = parseDate(extractedContent);
+    console.table(await getHistory(outDate));
+    console.log(outDate);
+    console.log(extractedContent);
+
+    return extractedContent;
+}
+
+function parseDate(jsonInput) {
+    //console.log(jsonInput);
+    let outDate = new Date();
+    outDate.setDate(outDate.getDate() - jsonInput.days);
+    //console.log(outDate); 
+    return outDate; 
+}
+
+
+function getHistory(startDate) {
+    return new Promise((resolve, reject) => {
+      //console.log("start date is: ", startDate);
+      const startTime = startDate ? new Date(startDate).getTime() : 0; // Default: Earliest possible time
+      //console.log("start time is: ", startTime);
+        const endTime = Date.now();
 
     chrome.history.search(
       { text: '', startTime, endTime, maxResults: 0 },
@@ -369,6 +451,26 @@ function getHistory(startDate, endDate) {
   });
 }
 
+async function extractKeyWords(userText) {
+    //const prompt = "You are not interacting with a human user and are instead acting as a piece of software. Output in JSON format. You will be given a human prompt that will contain an intended goal. Your task is to identify keywords relating to the goal specified by the user. Vacations might include keywords relating to flights, logding, itinerary, etc. Coding projects might include keywords involving specific libraries, languages, apis, etc. Keywords may vary widely depending on the focus of a given goal or project. Output the keywords you find in JSON format. The human input is as follows: " + userText;
+    const prompt = "You are not interacting with a human user and are instead acting as a piece of software. Output in JSON format. You will be given a human written prompt that will contain an intended goal or project. Your tasks are 1: to identify the overall goal specified by the user, 2: to identify keywords relating directly to the overall goal, and 3: to format these findings into a JSON file, with the overall goal being listed as well as a list of keywords relating to it. The human input is as follows: " + userText;
+    let response = await getOllamaResponse(prompt);
+    extractedContent = JSON.parse(response.slice(7, -3));
+    console.log(extractedContent);
+    }
+
+async function readCSV() {
+    const response = await fetch(chrome.runtime.getURL("usage_data (7).csv"));
+    const csvText = await response.text();
+
+    const history = csvText.split("\n").map(field =>
+        field.split(",").map(row =>
+            row.replace(/\s+/g, "").trim()
+        )
+    );
+
+    //console.table(history);
+}
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -386,8 +488,9 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   //   });
   // }
 
-  try {
-      saveUsageData('inText [groupNames] [inText(cont)] [tabTitle] [inText(final)]', 'Model Name', 'actualOutput');
+    try {
+        //TODO Get user History and add to JSON on installation -----------------------------------------------------------------------------------------------------------
+      //saveUsageData('inText [groupNames] [inText(cont)] [tabTitle] [inText(final)]', 'Model Name', 'actualOutput');
     await getVariables();
     // await loadLazyLoadingSettings(); // Load lazy loading settings first
     await migratePinnedGroups(); // Migrate pinned groups
@@ -425,6 +528,7 @@ const getVariables = async () => {
       'autoGroupingEnabled',
       'tabGroups',
       'allowManualGroupAccess',
+      'enableLLMSort',
     ]);
     autoCloseEnabled = result.autoCloseEnabled || false;
     autoCloseTime = result.autoCloseTime || { minutes: 120, seconds: 0 };
@@ -434,6 +538,7 @@ const getVariables = async () => {
     autoGroupingEnabled = result.autoGroupingEnabled || false;
     autoGroups = result.tabGroups || [];
     allowManualGroupAccess = result.allowManualGroupAccess || false;
+    enableLLMSort = result.enableLLMSort || false;
     console.log(
       'Variables Loaded',
       autoCloseEnabled,
@@ -443,36 +548,55 @@ const getVariables = async () => {
       autoSleepTime,
       autoGroupingEnabled,
       autoGroups,
-      allowManualGroupAccess
+      allowManualGroupAccess,
+      enableLLMSort
     );
   } catch (error) {
     console.error('Error getting variables from storage:', error);
   }
 };
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
+    if (message.action === "getDaysAction") {
+        prompt = "I am planning a trip to Japan and have already done some research for finding a flight but can't find the links I found during that initial phase of research. I searched for flights a few months ago, but can't find the links in my browser history. Can you search through my history to see if you can find the items relating to the search I did?"
+        console.log("if statement triggered");
+        let numberOfDays = getNumberOfDays(prompt);
+        response = parseDate(numberOfDays);
+        keyWords = extractKeyWords(prompt);
+        console.log(response);
+        sendResponse(response); // Ensure response is sent within timeout
+        return true;
+    }
+});
+
+
 chrome.storage.onChanged.addListener(async (changes) => {
   // console.log(changes);
-  if (changes.autoCloseEnabled) {
+    if (changes.autoCloseEnabled) {
+        history = await getHistory("2025-02-01T00:00:00Z", null);
+        console.table(history);
     autoCloseEnabled = changes.autoCloseEnabled.newValue;
   }
   if (changes.autoCloseTime) {
       autoCloseTime = changes.autoCloseTime.newValue;
-      history = await getHistory("2024-06-01", null);
-      console.table(history);
   }
   if (changes.lazyLoadingEnabled) {
       lazyLoadingEnabled = changes.lazyLoadingEnabled.newValue;
+
+      await readCSV();
       //downloadUsageData(usageData);
       history = await getHistory(null,null);
-      console.table(history);
+      //console.table(history);
+      downloadUsageData(history);
   }
   if (changes.autoSleepEnabled) {
-    autoSleepEnabled = changes.autoSleepEnabled.newValue;
+      autoSleepEnabled = changes.autoSleepEnabled.newValue;
   }
   if (changes.autoSleepTime) {
     autoSleepTime = changes.autoSleepTime.newValue;
   }
-  if (changes.autoGroupingEnabled) {
+    if (changes.autoGroupingEnabled) {
     autoGroupingEnabled = changes.autoGroupingEnabled.newValue;
     if (!autoGroupingEnabled) {
       await ungroupAllAutoGroups();
@@ -486,6 +610,11 @@ chrome.storage.onChanged.addListener(async (changes) => {
     allowManualGroupAccess = changes.allowManualGroupAccess.newValue;
   }
 
+  if (changes.enableLLMSort) {
+    console.log("enableLLMSort changed");
+    enableLLMSort = changes.enableLLMSort.newValue;
+  }
+
   console.log(
     'Variables Changed',
     autoCloseEnabled,
@@ -495,9 +624,12 @@ chrome.storage.onChanged.addListener(async (changes) => {
     autoSleepTime,
     autoGroupingEnabled,
     autoGroups,
-    allowManualGroupAccess
+    allowManualGroupAccess,
+    'enableSort',
+    enableLLMSort
   );
 });
+
 
 /**
  * Migrate pinned groups from storage to active tab groups
@@ -1050,54 +1182,59 @@ function tabToAutoGroup(tab) {
 ///////////////////////////////////////////////////////////////////////
 
 // new tab / new URL Event Listener
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.url) {
-    console.log(`Tab URL changed to: ${changeInfo.url}`);
-    title = tab.title;
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    console.log('listener called');
+    sort = await chrome.storage.local.get(['enableLLMSort']);
+    console.log(enableLLMSort);
+    if (enableLLMSort == true) {
+        if (changeInfo.url) {
+            console.log(`Tab URL changed to: ${changeInfo.url}`);
+            title = tab.title;
 
-    // no existing group, we must find a group to match to
-    if (tab.groupId == -1) {
-      // immediately attempt to assign to group
-      tabToAutoGroup(tab);
-    } else {
-      console.log(tab.groupId);
-      // two staged approach:
-      // 1. check if current group still fits
-      // 2. if yes (do nothing) / if no (find new group)
-      chrome.tabGroups.get(tab.groupId).then((inGroup) => {
-          // check if current group still fits
-        /*
-        const newGroupTitle = inGroup.title;
-        console.log(inGroup);
-
-          const inText = `You are not interacting with a human user and are instead acting as a piece software. Your job is to ensure that, when a tab's url changes, the tab group the tab is in still fits. 
-          For example, you may receive a title such as 'The Food Network' for tabs that belong in food related groups, or 'spotify' for tabs that belong in music related groups.
-          The following text is related to your input data. The title of the tab has changed to:[ ${title} ]. 
-          Currently, this tab is in the current group: [ ${newGroupTitle} ]. 
-          Is this group a good fit? Return only the word true or false. Do not add any text formatting of any kind`;
-
-        console.log(inText);
-
-
-
-              getLlmResponse(inText).then((groupCheck) => {
-                  console.log('Result from cleanString:', groupCheck);
-
-                  if (groupCheck !== 'true') {
-                      console.log('Group refit detected!!');
-                      tabToAutoGroup(tab);
-                      // TODO make group assignment a method with tab and group as inputs
-                  } else {
-                      console.log('Tab reassignment to another group not needed.');
-                  }
-              });
-         */ 
-          tabToAutoGroup(tab);
-       });
-      // construct a formatted string to take changeInfo.url and send to llm with current group
-      // You can add additional logic here to handle the URL change
+            // no existing group, we must find a group to match to
+            if (tab.groupId == -1) {
+                // immediately attempt to assign to group
+                tabToAutoGroup(tab);
+            } else {
+                console.log(tab.groupId);
+                // two staged approach:
+                // 1. check if current group still fits
+                // 2. if yes (do nothing) / if no (find new group)
+                chrome.tabGroups.get(tab.groupId).then((inGroup) => {
+                    // check if current group still fits
+                    /*
+                    const newGroupTitle = inGroup.title;
+                    console.log(inGroup);
+        
+                      const inText = `You are not interacting with a human user and are instead acting as a piece software. Your job is to ensure that, when a tab's url changes, the tab group the tab is in still fits. 
+                      For example, you may receive a title such as 'The Food Network' for tabs that belong in food related groups, or 'spotify' for tabs that belong in music related groups.
+                      The following text is related to your input data. The title of the tab has changed to:[ ${title} ]. 
+                      Currently, this tab is in the current group: [ ${newGroupTitle} ]. 
+                      Is this group a good fit? Return only the word true or false. Do not add any text formatting of any kind`;
+        
+                    console.log(inText);
+        
+        
+        
+                          getLlmResponse(inText).then((groupCheck) => {
+                              console.log('Result from cleanString:', groupCheck);
+        
+                              if (groupCheck !== 'true') {
+                                  console.log('Group refit detected!!');
+                                  tabToAutoGroup(tab);
+                                  // TODO make group assignment a method with tab and group as inputs
+                              } else {
+                                  console.log('Tab reassignment to another group not needed.');
+                              }
+                          });
+                     */
+                    tabToAutoGroup(tab);
+                });
+                // construct a formatted string to take changeInfo.url and send to llm with current group
+                // You can add additional logic here to handle the URL change
+            }
+        }
     }
-  }
 });
 
 // Listen for tab group removal (ungroup or close)
@@ -1145,7 +1282,8 @@ chrome.tabGroups.onRemoved.addListener((group) => {
 // Listen for tab group updates (title or color change)
 chrome.tabGroups.onUpdated.addListener((group, changeInfo) => {
   // sanity check sync
-
+    console.log('tabGroup listener called on ', group, 'with ', changeInfo, ' changes.');
+    console.log(group.collapsed);
   idInChrome = group.id;
   // console.log('tabGroups onUpdated listener groupId: ', group.id);
   console.log('tabGroups onUpdated listenter idInChrome: ', idInChrome);
@@ -1166,6 +1304,13 @@ chrome.tabGroups.onUpdated.addListener((group, changeInfo) => {
     );
     createAutoGroup(group);
   }
+
+    if (group.collapsed != undefined) {
+        if (!group.collapsed) {
+            console.log("tabGroup opened!");
+    }
+}
+
 });
 
 // Listen for tab group creation

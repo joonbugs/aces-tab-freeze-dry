@@ -58,6 +58,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const getDays = document.getElementById('getDays');
+    if (getDays) {
+        getDays.addEventListener('click', () => {
+            console.log('Get Days button clicked!');
+
+                chrome.runtime.sendMessage({ action: "getDaysAction" }, (response) => {
+                    
+                });
+        });
+    }
+
+
     // Display tabs initially
     displayTabs();
 });
